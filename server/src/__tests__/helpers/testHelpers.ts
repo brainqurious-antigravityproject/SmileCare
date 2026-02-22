@@ -1,17 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import { prisma as sharedPrisma } from '../../lib/prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
-let prisma: PrismaClient;
+let prisma: PrismaClient = sharedPrisma;
 
 /**
  * Get or create a singleton test Prisma client.
  */
 export function getTestPrisma(): PrismaClient {
-    if (!prisma) {
-        prisma = new PrismaClient();
-    }
     return prisma;
 }
 

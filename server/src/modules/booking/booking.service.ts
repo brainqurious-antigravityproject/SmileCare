@@ -1,7 +1,7 @@
 // ─── Booking Service — Business Logic ────────────────────────────────────────
 
 import { Prisma } from '@prisma/client';
-import { prisma } from '../../index';
+import { prisma } from '../../lib/prisma';
 import { SlotError } from './slot.service';
 import {
     CreateBookingBody,

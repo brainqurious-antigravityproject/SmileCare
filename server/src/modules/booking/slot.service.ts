@@ -1,7 +1,7 @@
 // ─── Slot Service — Business Logic ───────────────────────────────────────────
 
 import { Prisma, Slot } from '@prisma/client';
-import { prisma } from '../../index';
+import { prisma } from '../../lib/prisma';
 import {
     SlotWithPeriod,
     getPeriodHint,

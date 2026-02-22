@@ -13,7 +13,8 @@
  */
 
 import request from 'supertest';
-import { app, prisma } from '../../index';
+import { app } from '../../index';
+import { prisma } from '../../lib/prisma';
 import {
     getTestPrisma,
     disconnectTestPrisma,

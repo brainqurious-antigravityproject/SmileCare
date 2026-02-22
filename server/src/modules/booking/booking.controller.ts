@@ -15,7 +15,7 @@ import {
     RescheduleBody,
     CancelBody,
 } from './booking.types';
-import { prisma } from '../../index';
+import { prisma } from '../../lib/prisma';
 
 // ─── GET /api/slots ──────────────────────────────────────────────────────────
 
