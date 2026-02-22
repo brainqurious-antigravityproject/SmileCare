@@ -22,8 +22,10 @@ app.use(cookieParser());
 // Routes
 import authRoutes from './routes/authRoutes';
 import bookingRoutes from './modules/booking/booking.routes';
+import paymentRoutes from './modules/payment/payment.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api', bookingRoutes);
+app.use('/api', paymentRoutes);
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {

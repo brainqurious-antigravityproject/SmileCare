@@ -1,6 +1,6 @@
 // ─── Booking Service — Business Logic ────────────────────────────────────────
 
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { SlotError } from './slot.service';
 import {
@@ -11,120 +11,120 @@ import {
     calculateRefundEligibility,
 } from './booking.types';
 
+// Transaction client type — allows callers to pass their own transaction
+type TxClient = Parameters<Parameters<PrismaClient['$transaction']>[0]>[0];
+
 // ─── Create Booking ──────────────────────────────────────────────────────────
+// Accepts an optional transaction client so the payment service can call this
+// inside its own atomic transaction.
 
 export async function createBooking(
     input: CreateBookingBody,
-    patientId: string
+    patientId: string,
+    externalTx?: TxClient
 ) {
-    const { slotId, treatmentId, sessionId, idempotencyKey, notes } = input;
+    const execute = async (tx: TxClient) => {
+        const { slotId, treatmentId, sessionId, idempotencyKey, notes } = input;
 
-    return prisma.$transaction(
-        async (tx) => {
-            // ── Idempotency check ──────────────────────────────────────────────
-            if (idempotencyKey) {
-                const existing = await tx.booking.findUnique({
-                    where: { idempotencyKey },
-                    include: { slot: true, treatment: true },
-                });
-                if (existing) {
-                    console.log(
-                        `[BOOKING_IDEMPOTENT_HIT] idempotencyKey=${idempotencyKey} bookingId=${existing.id}`
-                    );
-                    return { booking: existing, isIdempotent: true };
-                }
+        // ── Idempotency check ──────────────────────────────────────────────
+        if (idempotencyKey) {
+            const existing = await tx.booking.findUnique({
+                where: { idempotencyKey },
+                include: { slot: true, treatment: true },
+            });
+            if (existing) {
+                console.log(
+                    `[BOOKING_IDEMPOTENT_HIT] idempotencyKey=${idempotencyKey} bookingId=${existing.id}`
+                );
+                return { booking: existing, isIdempotent: true };
             }
+        }
 
-            // ── Lock & verify slot ─────────────────────────────────────────────
-            const rows = await tx.$queryRaw<
-                Array<{
-                    id: string;
-                    dentistId: string;
-                    isAvailable: boolean;
-                    holdExpiresAt: Date | null;
-                    heldBySessionId: string | null;
-                }>
-            >`SELECT "id", "dentistId", "isAvailable", "holdExpiresAt", "heldBySessionId"
+        // ── Lock & verify slot ─────────────────────────────────────────────
+        const rows = await tx.$queryRaw<
+            Array<{
+                id: string;
+                dentistId: string;
+                isAvailable: boolean;
+                holdExpiresAt: Date | null;
+                heldBySessionId: string | null;
+            }>
+        >`SELECT "id", "dentistId", "isAvailable", "holdExpiresAt", "heldBySessionId"
         FROM "Slot"
         WHERE "id" = ${slotId}
         FOR UPDATE`;
 
-            if (rows.length === 0) {
-                throw new BookingError('SLOT_NOT_FOUND', 'Slot not found');
-            }
-
-            const slot = rows[0];
-            const now = new Date();
-
-            // Step 1: If slot is unavailable AND not held by this session → reject
-            if (!slot.isAvailable && slot.heldBySessionId !== sessionId) {
-                throw new BookingError(
-                    'SLOT_UNAVAILABLE',
-                    'Slot is no longer available'
-                );
-            }
-
-            // Step 2: Verify hold belongs to this session
-            if (slot.heldBySessionId !== sessionId) {
-                throw new BookingError(
-                    'HOLD_MISMATCH',
-                    'Slot is not held by your session.'
-                );
-            }
-
-            // Step 3: Verify hold hasn't expired
-            if (slot.holdExpiresAt && slot.holdExpiresAt < now) {
-                throw new BookingError(
-                    'HOLD_EXPIRED',
-                    'Your hold has expired.'
-                );
-            }
-
-            // ── Stub payment verification ──────────────────────────────────────
-            // TODO: Integrate with Razorpay payment verification here
-            const paymentVerified = true;
-            if (!paymentVerified) {
-                throw new BookingError(
-                    'PAYMENT_FAILED',
-                    'Payment verification failed'
-                );
-            }
-
-            // ── Create the booking ─────────────────────────────────────────────
-            const booking = await tx.booking.create({
-                data: {
-                    patientId,
-                    dentistId: slot.dentistId,
-                    treatmentId,
-                    slotId,
-                    status: 'confirmed',
-                    idempotencyKey: idempotencyKey || undefined,
-                    notes: notes || undefined,
-                },
-                include: { slot: true, treatment: true },
-            });
-
-            // ── Clear hold fields & mark slot as taken ─────────────────────────
-            await tx.slot.update({
-                where: { id: slotId },
-                data: {
-                    isAvailable: false,
-                    holdExpiresAt: null,
-                    heldBySessionId: null,
-                    version: { increment: 1 },
-                },
-            });
-
-            console.log(
-                `[BOOKING_CREATED] bookingId=${booking.id} slotId=${slotId} patientId=${patientId} status=confirmed`
-            );
-
-            return { booking, isIdempotent: false };
-        },
-        {
-            isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        if (rows.length === 0) {
+            throw new BookingError('SLOT_NOT_FOUND', 'Slot not found');
         }
-    );
+
+        const slot = rows[0];
+        const now = new Date();
+
+        // Step 1: If slot is unavailable AND not held by this session → reject
+        if (!slot.isAvailable && slot.heldBySessionId !== sessionId) {
+            throw new BookingError(
+                'SLOT_UNAVAILABLE',
+                'Slot is no longer available'
+            );
+        }
+
+        // Step 2: Verify hold belongs to this session
+        if (slot.heldBySessionId !== sessionId) {
+            throw new BookingError(
+                'HOLD_MISMATCH',
+                'Slot is not held by your session.'
+            );
+        }
+
+        // Step 3: Verify hold hasn't expired
+        if (slot.holdExpiresAt && slot.holdExpiresAt < now) {
+            throw new BookingError(
+                'HOLD_EXPIRED',
+                'Your hold has expired.'
+            );
+        }
+
+        // ── Create the booking ─────────────────────────────────────────────
+        const booking = await tx.booking.create({
+            data: {
+                patientId,
+                dentistId: slot.dentistId,
+                treatmentId,
+                slotId,
+                status: 'confirmed',
+                idempotencyKey: idempotencyKey || undefined,
+                notes: notes || undefined,
+            },
+            include: { slot: true, treatment: true },
+        });
+
+        // ── Clear hold fields & mark slot as taken ─────────────────────────
+        await tx.slot.update({
+            where: { id: slotId },
+            data: {
+                isAvailable: false,
+                holdExpiresAt: null,
+                heldBySessionId: null,
+                version: { increment: 1 },
+            },
+        });
+
+        console.log(
+            `[BOOKING_CREATED] bookingId=${booking.id} slotId=${slotId} patientId=${patientId} status=confirmed`
+        );
+
+        return { booking, isIdempotent: false };
+    };
+
+    // If called with an external transaction, run inside it; otherwise create one
+    if (externalTx) {
+        return execute(externalTx);
+    }
+
+    return prisma.$transaction(execute, {
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+    });
 }
 
 // ─── Reschedule Booking ──────────────────────────────────────────────────────
@@ -362,10 +362,10 @@ export async function cancelBooking(
             const updatedBooking = await tx.booking.update({
                 where: { id: bookingId },
                 data: {
-                    status: 'cancelled',
+                    status: refundEligible ? 'refund_pending' : 'cancelled',
                     cancellationReason: reason || undefined,
                 },
-                include: { slot: true, treatment: true },
+                include: { slot: true, treatment: true, payment: true },
             });
 
             // ── Release the slot ───────────────────────────────────────────────
@@ -385,7 +385,6 @@ export async function cancelBooking(
                 `[BOOKING_CANCELLED] bookingId=${bookingId} slotId=${booking.slotId} reason=${reason || 'none'} refundEligible=${refundEligible}`
             );
 
-            // NOTE: refundEligible is returned but we do NOT call Razorpay yet
             return { booking: updatedBooking, refundEligible };
         },
         {
