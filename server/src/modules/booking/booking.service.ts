@@ -350,7 +350,7 @@ export async function cancelBooking(
 
             if (slot) {
                 const refundResult = calculateRefundEligibility(
-                    { status: booking.status as any, createdAt: new Date() },
+                    { status: booking.status as any },
                     slot.date,
                     slot.startTime,
                     adminOverride

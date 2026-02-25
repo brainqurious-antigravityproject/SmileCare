@@ -44,7 +44,8 @@ export async function createMockOrder(input: CreateOrderBody) {
     if (!slot) {
         throw new PaymentError('SLOT_NOT_FOUND', 'Slot not found');
     }
-    if (slot.isAvailable && !slot.heldBySessionId) {
+    // Slot must be actively held before creating order
+    if (!slot.heldBySessionId) {
         throw new PaymentError(
             'SLOT_NOT_HELD',
             'Slot must be held before creating a payment order'
@@ -171,14 +172,18 @@ export async function verifyMockPayment(
     );
 
     // Clean up the mock order from memory
-    pendingOrders.delete(orderId);
+    try {
+        pendingOrders.delete(orderId);
+    } catch (err) {
+        console.warn('[ORDER_CLEANUP_WARNING]', err);
+    }
 
     return result;
 }
 
 // ─── Refund Mock Payment ─────────────────────────────────────────────────────
 
-export async function refundMockPayment(paymentId: string, amount: number) {
+export async function refundMockPayment(paymentId: string, amount?: number) {
     return prisma.$transaction(
         async (tx) => {
             // Lock the payment row

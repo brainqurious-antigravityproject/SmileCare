@@ -132,7 +132,7 @@ export interface RefundEligibilityResult {
  * Only confirmed/pending_payment bookings are refund-eligible.
  */
 export function calculateRefundEligibility(
-    booking: { status: BookingStatus; createdAt: Date },
+    booking: { status: BookingStatus },
     slotDate: Date,
     startTime: string,
     adminOverride: boolean = false

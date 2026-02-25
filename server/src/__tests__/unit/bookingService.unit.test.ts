@@ -175,7 +175,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         futureDate.setDate(futureDate.getDate() + 3);
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.confirmed, createdAt: new Date() },
+            { status: BookingStatus.confirmed },
             futureDate,
             '10:00'
         );
@@ -190,7 +190,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         const mins = futureDate.getMinutes().toString().padStart(2, '0');
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.confirmed, createdAt: new Date() },
+            { status: BookingStatus.confirmed },
             futureDate,
             `${hours}:${mins}`
         );
@@ -206,7 +206,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         const mins = futureDate.getMinutes().toString().padStart(2, '0');
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.confirmed, createdAt: new Date() },
+            { status: BookingStatus.confirmed },
             futureDate,
             `${hours}:${mins}`,
             true // adminOverride
@@ -223,7 +223,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         const mins = futureDate.getMinutes().toString().padStart(2, '0');
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.confirmed, createdAt: new Date() },
+            { status: BookingStatus.confirmed },
             futureDate,
             `${hours}:${mins}`,
             false
@@ -236,7 +236,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         futureDate.setDate(futureDate.getDate() + 3);
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.cancelled, createdAt: new Date() },
+            { status: BookingStatus.cancelled },
             futureDate,
             '10:00'
         );
@@ -248,7 +248,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
         futureDate.setDate(futureDate.getDate() + 3);
 
         const result = calculateRefundEligibility(
-            { status: BookingStatus.expired, createdAt: new Date() },
+            { status: BookingStatus.expired },
             futureDate,
             '10:00'
         );
@@ -258,7 +258,7 @@ describe('Refund Eligibility — Strict Binary Policy', () => {
     test('ineligible when appointment has passed', () => {
         const pastDate = new Date('2020-01-01');
         const result = calculateRefundEligibility(
-            { status: BookingStatus.confirmed, createdAt: new Date() },
+            { status: BookingStatus.confirmed },
             pastDate,
             '10:00'
         );

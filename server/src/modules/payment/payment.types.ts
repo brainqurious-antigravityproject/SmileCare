@@ -23,6 +23,11 @@ export interface MockOrder {
     createdAt: Date;
 }
 
+export interface RefundBody {
+    paymentId: string;
+    amount?: number;
+}
+
 export class PaymentError extends Error {
     code: string;
     constructor(code: string, message: string) {

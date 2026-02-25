@@ -139,3 +139,32 @@ export async function verifyPayment(req: AuthRequest, res: Response) {
         );
     }
 }
+
+// ─── POST /api/payments/refund ───────────────────────────────────────────────
+
+export async function refundPayment(req: AuthRequest, res: Response) {
+    try {
+        const { paymentId, amount } = req.body;
+
+        if (!paymentId) {
+            return res.status(400).json(
+                errorResponse('VALIDATION_ERROR', 'paymentId is required')
+            );
+        }
+
+        const result = await paymentService.refundMockPayment(paymentId, amount);
+
+        return res.status(200).json(successResponse(result));
+    } catch (error: any) {
+        if (error instanceof PaymentError) {
+            return res.status(400).json(
+                errorResponse(error.code, error.message)
+            );
+        }
+
+        console.error('[REFUND_ERROR]', error);
+        return res.status(500).json(
+            errorResponse('INTERNAL_ERROR', 'Refund failed')
+        );
+    }
+}
