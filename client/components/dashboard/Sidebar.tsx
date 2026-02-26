@@ -1,0 +1,150 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+    LayoutDashboard,
+    CalendarDays,
+    History,
+    FileText,
+    Settings,
+    HelpCircle,
+    PlusCircle,
+    LogOut,
+    Menu,
+    X,
+} from "lucide-react";
+
+const navItems = [
+    { label: "Overview", icon: LayoutDashboard, href: "/dashboard", active: true },
+    { label: "Appointments", icon: CalendarDays, href: "/dashboard", active: false },
+    { label: "History", icon: History, href: "/dashboard", active: false },
+    { label: "Documents", icon: FileText, href: "/dashboard", active: false },
+];
+
+const accountItems = [
+    { label: "Settings", icon: Settings, href: "/dashboard" },
+    { label: "Support", icon: HelpCircle, href: "/dashboard" },
+];
+
+export default function Sidebar() {
+    const [open, setOpen] = useState(false);
+
+    return (
+        <>
+            {/* Mobile toggle */}
+            <button
+                onClick={() => setOpen(true)}
+                className="fixed top-5 left-5 z-[60] lg:hidden size-10 flex items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20"
+                aria-label="Open menu"
+            >
+                <Menu size={20} />
+            </button>
+
+            {/* Overlay */}
+            {open && (
+                <div
+                    className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm lg:hidden"
+                    onClick={() => setOpen(false)}
+                />
+            )}
+
+            {/* Sidebar */}
+            <aside
+                className={`
+                    fixed lg:sticky top-0 left-0 z-[70] lg:z-auto
+                    w-72 h-screen bg-white border-r border-primary/10
+                    flex flex-col transition-transform duration-300
+                    ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+                `}
+            >
+                {/* Logo + Close */}
+                <div className="p-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                            <span className="font-display font-black text-lg">S</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <h1 className="text-primary text-lg font-bold leading-none">SmileCare</h1>
+                            <p className="text-primary/50 text-xs font-semibold uppercase tracking-wider">Clinical Luxury</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setOpen(false)}
+                        className="lg:hidden text-primary/40 hover:text-primary"
+                        aria-label="Close menu"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                {/* Navigation */}
+                <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+                    <div className="py-4">
+                        <p className="px-3 text-[10px] font-bold text-primary/30 uppercase tracking-[0.2em] mb-2">Main Menu</p>
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${item.active
+                                        ? "bg-primary/10 text-primary font-semibold"
+                                        : "text-primary/50 hover:bg-primary/5 hover:text-primary/70"
+                                    }`}
+                            >
+                                <item.icon size={20} />
+                                <span className="text-sm">{item.label}</span>
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="py-4">
+                        <p className="px-3 text-[10px] font-bold text-primary/30 uppercase tracking-[0.2em] mb-2">Account</p>
+                        {accountItems.map((item) => (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-primary/50 hover:bg-primary/5 hover:text-primary/70 transition-all"
+                            >
+                                <item.icon size={20} />
+                                <span className="text-sm">{item.label}</span>
+                            </Link>
+                        ))}
+                    </div>
+                </nav>
+
+                {/* Bottom Section */}
+                <div className="p-4 mt-auto">
+                    <Link
+                        href="/booking"
+                        className="w-full flex items-center justify-center gap-2 bg-primary text-white rounded-xl py-3 text-sm font-bold shadow-lg shadow-primary/30 hover:opacity-90 transition-all"
+                    >
+                        <PlusCircle size={18} />
+                        Book Appointment
+                    </Link>
+
+                    <div className="mt-6 p-3 bg-primary/5 rounded-xl flex items-center gap-3">
+                        <div className="size-10 rounded-full overflow-hidden relative shrink-0">
+                            <Image
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-oZ3mIeMUTEOiX2JSp4OxxTix9S6JpWdD-V2Oodi5EMmqrZeF8lSnaQXtbqb1qk2It4dcQKU0XL415vAS_tQmio_aWj54Hxy-Y4kODpO-Y6BoiJFe9YrC3DIKY551EnWOX4rwGgVGrlzw9wnEIoA1bv4qVz2Kz5Haw3Ef4F-IszGFcXEUPtXcbAMY5sipuQQR5t1OaVzXqqA5vtP_eP2IzCUIGgtNyKKf0J9D3Mp4OEblM4rsFDl_DVQCABSpVmsPh9YaQRhIlWUG"
+                                alt="Alex Sterling"
+                                fill
+                                className="object-cover"
+                                unoptimized
+                            />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-primary truncate">Alex Sterling</p>
+                            <p className="text-[10px] text-primary/40 uppercase tracking-tight">Premium Member</p>
+                        </div>
+                        <button className="text-primary/30 hover:text-primary transition-colors" aria-label="Logout">
+                            <LogOut size={18} />
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </>
+    );
+}

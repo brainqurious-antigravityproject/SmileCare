@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Serif, Noto_Sans } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 
 const notoSerif = Noto_Serif({
   variable: "--font-noto-serif",
@@ -33,14 +31,11 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${notoSerif.variable} ${notoSans.variable} antialiased font-body bg-background-light text-slate-900 dark:bg-background-dark dark:text-slate-100 min-h-screen flex flex-col`}
+        className={`${notoSerif.variable} ${notoSans.variable} antialiased font-body bg-background-light text-slate-900 min-h-screen`}
       >
-        <Header />
-        <main className="flex-grow pt-20">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
 }
+
