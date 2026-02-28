@@ -81,7 +81,7 @@ export async function verifyPayment(req: AuthRequest, res: Response) {
 
         // Look up patient from authenticated user
         const patient = await prisma.patient.findUnique({
-            where: { userId: req.user!.userId },
+            where: { userId: req.user!.id },
         });
 
         if (!patient) {

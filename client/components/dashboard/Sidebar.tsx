@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import {
     LayoutDashboard,
     CalendarDays,
@@ -17,19 +18,38 @@ import {
 } from "lucide-react";
 
 const navItems = [
-    { label: "Overview", icon: LayoutDashboard, href: "/dashboard", active: true },
-    { label: "Appointments", icon: CalendarDays, href: "/dashboard", active: false },
-    { label: "History", icon: History, href: "/dashboard", active: false },
-    { label: "Documents", icon: FileText, href: "/dashboard", active: false },
+    { label: "Overview", icon: LayoutDashboard, href: "/dashboard" },
+    { label: "Appointments", icon: CalendarDays, href: "/dashboard/appointments" },
+    { label: "History", icon: History, href: "/dashboard/history" },
+    { label: "Documents", icon: FileText, href: "/dashboard/documents" },
 ];
 
 const accountItems = [
-    { label: "Settings", icon: Settings, href: "/dashboard" },
-    { label: "Support", icon: HelpCircle, href: "/dashboard" },
+    { label: "Settings", icon: Settings, href: "/dashboard/settings" },
+    { label: "Support", icon: HelpCircle, href: "/dashboard/support" },
 ];
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Sidebar() {
     const [open, setOpen] = useState(false);
+    const pathname = usePathname();
+    const router = useRouter();
+
+    const isActive = (href: string) => {
+        if (href === "/dashboard") return pathname === "/dashboard";
+        return pathname.startsWith(href);
+    };
+
+    const handleLogout = async () => {
+        try {
+            await fetch(`${API}/api/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            }).catch(() => null);
+        } catch { /* silent */ }
+        router.push("/");
+    };
 
     return (
         <>
@@ -88,9 +108,9 @@ export default function Sidebar() {
                                 key={item.label}
                                 href={item.href}
                                 onClick={() => setOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${item.active
-                                        ? "bg-primary/10 text-primary font-semibold"
-                                        : "text-primary/50 hover:bg-primary/5 hover:text-primary/70"
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive(item.href)
+                                    ? "bg-primary/10 text-primary font-semibold"
+                                    : "text-primary/50 hover:bg-primary/5 hover:text-primary/70"
                                     }`}
                             >
                                 <item.icon size={20} />
@@ -106,7 +126,10 @@ export default function Sidebar() {
                                 key={item.label}
                                 href={item.href}
                                 onClick={() => setOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-primary/50 hover:bg-primary/5 hover:text-primary/70 transition-all"
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${isActive(item.href)
+                                    ? "bg-primary/10 text-primary font-semibold"
+                                    : "text-primary/50 hover:bg-primary/5 hover:text-primary/70"
+                                    }`}
                             >
                                 <item.icon size={20} />
                                 <span className="text-sm">{item.label}</span>
@@ -126,7 +149,7 @@ export default function Sidebar() {
                     </Link>
 
                     <div className="mt-6 p-3 bg-primary/5 rounded-xl flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden relative shrink-0">
+                        <div className="size-10 rounded-full overflow-hidden relative shrink-0 bg-primary/10">
                             <Image
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-oZ3mIeMUTEOiX2JSp4OxxTix9S6JpWdD-V2Oodi5EMmqrZeF8lSnaQXtbqb1qk2It4dcQKU0XL415vAS_tQmio_aWj54Hxy-Y4kODpO-Y6BoiJFe9YrC3DIKY551EnWOX4rwGgVGrlzw9wnEIoA1bv4qVz2Kz5Haw3Ef4F-IszGFcXEUPtXcbAMY5sipuQQR5t1OaVzXqqA5vtP_eP2IzCUIGgtNyKKf0J9D3Mp4OEblM4rsFDl_DVQCABSpVmsPh9YaQRhIlWUG"
                                 alt="Alex Sterling"
@@ -139,7 +162,7 @@ export default function Sidebar() {
                             <p className="text-sm font-bold text-primary truncate">Alex Sterling</p>
                             <p className="text-[10px] text-primary/40 uppercase tracking-tight">Premium Member</p>
                         </div>
-                        <button className="text-primary/30 hover:text-primary transition-colors" aria-label="Logout">
+                        <button onClick={handleLogout} className="text-primary/30 hover:text-primary transition-colors" aria-label="Logout">
                             <LogOut size={18} />
                         </button>
                     </div>

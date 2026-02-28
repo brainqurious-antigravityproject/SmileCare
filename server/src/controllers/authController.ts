@@ -3,9 +3,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
-const JWT_EXPIRES_IN = '1d';
-
 export const register = async (req: Request, res: Response) => {
     try {
         const { name, email, phone, password, role } = req.body;
@@ -22,7 +19,7 @@ export const register = async (req: Request, res: Response) => {
         }
 
         // Hash password
-        const passwordHash = await bcrypt.hash(password, 12);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create user
         const user = await prisma.user.create({
@@ -30,7 +27,7 @@ export const register = async (req: Request, res: Response) => {
                 name,
                 email,
                 phone,
-                passwordHash,
+                passwordHash: hashedPassword,
                 role: role || 'patient'
             }
         });
@@ -53,42 +50,45 @@ export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
-        // Find user
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
+
         if (!user) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Check password
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-        if (!isPasswordValid) {
+        const validPassword = await bcrypt.compare(password, user.passwordHash);
+
+        if (!validPassword) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
 
-        // Generate token
         const token = jwt.sign(
-            { userId: user.id, role: user.role },
-            JWT_SECRET,
-            { expiresIn: JWT_EXPIRES_IN }
+            { id: user.id, role: user.role },
+            process.env.JWT_SECRET!,
+            { expiresIn: '7d' }
         );
 
-        // Set cookie
-        res.cookie('token', token, {
+        res.cookie('accessToken', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
+            sameSite: 'lax',
+            secure: false, // true in production
         });
 
-        res.status(200).json({
-            message: 'Login successful',
-            user: {
-                id: user.id,
-                name: user.name,
-                role: user.role
-            }
-        });
+        return res.status(200).json({ message: 'Login successful' });
+
     } catch (error) {
-        console.error('Login Error:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        console.error('LOGIN ERROR:', error);
+        return res.status(500).json({ message: 'Server error' });
     }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    res.clearCookie('accessToken', {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false, // true in production
+    });
+    res.status(200).json({ message: 'Logged out successfully' });
 };

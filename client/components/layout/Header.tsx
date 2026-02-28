@@ -1,10 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const Header = () => {
+    const router = useRouter();
+    const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userName, setUserName] = useState("");
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const res = await fetch(`${API}/api/patient/me`, {
+                    credentials: "include",
+                }).catch(() => null);
+                if (res?.ok) {
+                    const data = await res.json();
+                    setIsAuthenticated(true);
+                    setUserName(data.name || "");
+                } else {
+                    setIsAuthenticated(false);
+                }
+            } catch {
+                setIsAuthenticated(false);
+            }
+        };
+        checkAuth();
+    }, [pathname]);
+
+    const handleLogout = async () => {
+        try {
+            await fetch(`${API}/api/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            }).catch(() => null);
+        } catch { /* silent */ }
+        setIsAuthenticated(false);
+        setUserName("");
+        router.push("/");
+    };
 
     const navLinks = [
         { name: "Home", href: "/" },
@@ -17,15 +56,16 @@ const Header = () => {
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-20">
-                    <div className="flex-shrink-0 flex items-center">
+                <div className="flex justify-between items-center h-20 relative px-4 sm:px-6 lg:px-8">
+                    {/* Logo */}
+                    <div className="flex-shrink-0 flex items-center z-10">
                         <Link href="/" className="text-2xl font-display font-bold text-primary">
                             SmileCare<span className="text-accent-gold">.</span>
                         </Link>
                     </div>
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* Perfectly Centered Desktop Nav Links */}
+                    <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center space-x-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
@@ -35,12 +75,41 @@ const Header = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        <Link
-                            href="/booking"
-                            className="bg-primary text-white px-6 py-2.5 rounded-full font-semibold hover:bg-navy-deep transition-all shadow-md active:scale-95"
-                        >
-                            Book Now
-                        </Link>
+                    </div>
+
+                    {/* Desktop Auth Buttons */}
+                    <div className="hidden md:flex items-center space-x-6 z-10">
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className="text-primary font-semibold hover:underline decoration-2 underline-offset-4 decoration-primary/20 hover:decoration-primary"
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-primary/50 font-semibold hover:text-primary transition-all active:scale-95"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="text-primary font-semibold border-2 border-primary/20 px-6 py-2 rounded-full hover:bg-primary/5 hover:border-primary/40 transition-all active:scale-95"
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    className="bg-primary text-white border-2 border-primary px-6 py-2 rounded-full font-semibold hover:bg-navy-deep hover:border-navy-deep transition-all shadow-md active:scale-95"
+                                >
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -91,13 +160,44 @@ const Header = () => {
                                 {link.name}
                             </Link>
                         ))}
-                        <Link
-                            href="/booking"
-                            className="block px-3 py-3 mt-4 bg-primary text-white text-center rounded-lg font-semibold"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Book Appointment
-                        </Link>
+
+                        {isAuthenticated ? (
+                            <>
+                                <Link
+                                    href="/dashboard"
+                                    className="block px-3 py-2 text-primary font-semibold"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Dashboard
+                                </Link>
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        handleLogout();
+                                    }}
+                                    className="block w-full text-left px-3 py-2 text-primary/50 font-semibold"
+                                >
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="block px-3 py-2 text-primary font-semibold"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/signup"
+                                    className="block px-3 py-3 mt-4 bg-primary text-white text-center rounded-lg font-semibold"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Create Account
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

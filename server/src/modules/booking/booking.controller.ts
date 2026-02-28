@@ -95,7 +95,7 @@ export async function createBooking(req: AuthRequest, res: Response) {
 
         // Look up patient from authenticated user
         const patient = await prisma.patient.findUnique({
-            where: { userId: req.user!.userId },
+            where: { userId: req.user!.id },
         });
 
         if (!patient) {
@@ -144,7 +144,7 @@ export async function rescheduleBooking(req: AuthRequest, res: Response) {
         const booking = await bookingService.rescheduleBooking(
             id,
             newSlotId,
-            req.user!.userId
+            req.user!.id
         );
 
         return res.status(200).json(successResponse(booking));
@@ -179,7 +179,7 @@ export async function cancelBooking(req: AuthRequest, res: Response) {
 
         const result = await bookingService.cancelBooking(
             id,
-            req.user!.userId,
+            req.user!.id,
             reason,
             adminOverride
         );
