@@ -3,18 +3,20 @@ import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 
-// Load env vars (needed when this module is imported before index.ts calls dotenv)
 dotenv.config();
 
-// Required for Supabase pooler SSL (self-signed cert in chain)
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-const connectionString = process.env.DATABASE_URL!;
+// Strip any sslmode query param from the connection string
+// so pg-connection-string doesn't override our ssl config below
+const rawUrl = process.env.DATABASE_URL!;
+const connectionString = rawUrl.replace(/[?&]sslmode=[^&]*/g, (match) => {
+    // If sslmode was the first query param (after ?), remove ? too
+    return match.startsWith('?') ? '' : match.replace(/^&/, '?');
+});
 
 const pool = new Pool({
     connectionString,
     ssl: {
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Required for Supabase dev pooler (self-signed cert)
     },
 });
 

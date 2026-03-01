@@ -5,10 +5,8 @@ import Image from "next/image";
 interface Specialist {
     id: string;
     name: string;
-    specialty: string;
-    rating: number;
-    reviewsCount: number;
-    image: string;
+    specialization: string;
+    photoUrl?: string | null;
 }
 
 interface SpecialistStepProps {
@@ -45,13 +43,13 @@ export default function SpecialistStep({ specialists, selectedId, onSelect, isLo
                             key={specialist.id}
                             onClick={() => onSelect(specialist)}
                             className={`group flex items-center gap-5 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${isSelected
-                                    ? "border-primary bg-white shadow-xl shadow-primary/5"
-                                    : "border-slate-100 bg-white hover:border-primary/20"
+                                ? "border-primary bg-white shadow-xl shadow-primary/5"
+                                : "border-slate-100 bg-white hover:border-primary/20"
                                 }`}
                         >
                             <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-slate-100">
                                 <Image
-                                    src={specialist.image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200"}
+                                    src={specialist.photoUrl || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200"}
                                     alt={specialist.name}
                                     fill
                                     className="object-cover"
@@ -61,12 +59,12 @@ export default function SpecialistStep({ specialists, selectedId, onSelect, isLo
                             <div className="flex-1">
                                 <h4 className="font-bold text-slate-800">{specialist.name}</h4>
                                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest mt-0.5">
-                                    {specialist.specialty}
+                                    {specialist.specialization}
                                 </p>
                                 <div className="flex items-center gap-2 mt-1">
                                     <span className="material-symbols-outlined text-yellow-500 text-xs fill-current">star</span>
-                                    <span className="text-xs font-bold text-slate-700">{specialist.rating}</span>
-                                    <span className="text-[10px] text-slate-400 font-medium">({specialist.reviewsCount}+ reviews)</span>
+                                    <span className="text-xs font-bold text-slate-700">4.9</span>
+                                    <span className="text-[10px] text-slate-400 font-medium">(100+ reviews)</span>
                                 </div>
                             </div>
 

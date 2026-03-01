@@ -99,6 +99,9 @@ model Dentist {
   specialization String
   bio            String?
   photoUrl       String?
+  rating         Float     @default(5.0)
+  reviewsCount   Int       @default(0)
+  isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   slots          Slot[]
@@ -121,7 +124,11 @@ model Treatment {
   procedureSteps Json?
   faqs           Json?
   priceRange     String?
+  price          Float?
+  duration       Int?
+  icon           String?
   imageUrl       String?
+  isActive       Boolean           @default(true)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
   bookings       Booking[]

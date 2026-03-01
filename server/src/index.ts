@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -22,11 +25,15 @@ import bookingRoutes from './modules/booking/booking.routes';
 import paymentRoutes from './modules/payment/payment.routes';
 import patientRoutes from './modules/patient/patient.routes';
 import supportRoutes from './modules/support/support.routes';
+import treatmentRoutes from './modules/treatment/treatment.routes';
+import dentistRoutes from './modules/dentist/dentist.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api', bookingRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api', patientRoutes);
 app.use('/api', supportRoutes);
+app.use('/api', treatmentRoutes);
+app.use('/api', dentistRoutes);
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {

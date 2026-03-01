@@ -1,48 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const Header = () => {
-    const router = useRouter();
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userName, setUserName] = useState("");
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const res = await fetch(`${API}/api/patient/me`, {
-                    credentials: "include",
-                }).catch(() => null);
-                if (res?.ok) {
-                    const data = await res.json();
-                    setIsAuthenticated(true);
-                    setUserName(data.name || "");
-                } else {
-                    setIsAuthenticated(false);
-                }
-            } catch {
-                setIsAuthenticated(false);
-            }
-        };
-        checkAuth();
-    }, [pathname]);
+    const { isAuthenticated, user, logout } = useAuth();
 
     const handleLogout = async () => {
-        try {
-            await fetch(`${API}/api/auth/logout`, {
-                method: "POST",
-                credentials: "include",
-            }).catch(() => null);
-        } catch { /* silent */ }
-        setIsAuthenticated(false);
-        setUserName("");
-        router.push("/");
+        setIsMenuOpen(false);
+        await logout();
     };
 
     const navLinks = [

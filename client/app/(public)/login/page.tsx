@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LogIn, Loader2, Eye, EyeOff } from "lucide-react";
+import { Suspense } from "react";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectTo = searchParams.get("redirect") || "/dashboard";
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPw, setShowPw] = useState(false);
@@ -31,7 +35,8 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (res.ok) {
-                router.push("/dashboard");
+                // Redirect to original destination (payment, dashboard, etc.)
+                router.push(redirectTo);
             } else {
                 setError(data.message || "Invalid credentials. Please try again.");
             }
@@ -57,6 +62,13 @@ export default function LoginPage() {
                 <p className="text-primary/50 text-center mt-2 font-sans">
                     Premium dental experience awaits.
                 </p>
+
+                {/* Context message for payment redirect */}
+                {redirectTo === "/payment" && (
+                    <div className="mt-6 p-3 bg-primary/5 border border-primary/20 rounded-xl text-primary text-sm font-medium text-center">
+                        🔒 Please sign in to complete your payment
+                    </div>
+                )}
 
                 {/* Error */}
                 {error && (
@@ -113,11 +125,26 @@ export default function LoginPage() {
                 {/* Footer */}
                 <p className="mt-8 text-center text-sm text-primary/40 font-sans">
                     Don&apos;t have an account?{" "}
-                    <Link href="/signup" className="text-primary font-semibold hover:underline">
+                    <Link
+                        href={`/signup${redirectTo !== "/dashboard" ? `?redirect=${encodeURIComponent(redirectTo)}` : ""}`}
+                        className="text-primary font-semibold hover:underline"
+                    >
                         Create one
                     </Link>
                 </p>
             </div>
         </main>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen flex items-center justify-center bg-background-light">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </main>
+        }>
+            <LoginForm />
+        </Suspense>
     );
 }

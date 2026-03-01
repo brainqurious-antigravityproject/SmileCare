@@ -2,13 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignupPage() {
-    const router = useRouter();
+    const { register } = useAuth();
     const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
     const [showPw, setShowPw] = useState(false);
     const [error, setError] = useState("");
@@ -22,40 +20,11 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            // Register
-            const regRes = await fetch(`${API}/api/auth/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ ...form, role: "patient" }),
-            });
-
-            const regData = await regRes.json();
-
-            if (!regRes.ok) {
-                setError(regData.message || "Registration failed.");
-                setLoading(false);
-                return;
-            }
-
-            // Auto-login after registration
-            const loginRes = await fetch(`${API}/api/auth/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ email: form.email, password: form.password }),
-            });
-
-            if (loginRes.ok) {
-                router.push("/dashboard");
-            } else {
-                // Registration succeeded, manual login needed
-                router.push("/login");
-            }
-        } catch {
-            setError("Unable to connect to server. Please try again later.");
+            await register(form.name, form.email, form.phone, form.password);
+            // AuthContext handles auto-login and redirect to /dashboard
+        } catch (err: any) {
+            setError(err.message || "Registration failed. Please try again.");
         }
-
         setLoading(false);
     };
 

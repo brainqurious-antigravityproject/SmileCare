@@ -3,19 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 
-interface Slot {
-    id: string;
-    startTime: string;
-    isAvailable: boolean;
-}
+import { Slot } from "@/lib/booking.api";
 
 interface ScheduleStepProps {
     selectedDate: Date | null;
     onDateSelect: (date: Date) => void;
-    slots: Slot[];
+    slots: Slot[] | undefined | null;
     selectedSlotId: string | null;
     onSlotSelect: (slot: Slot) => void;
     isLoadingSlots: boolean;
+    slotsError?: string | null;
 }
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -27,7 +24,8 @@ export default function ScheduleStep({
     slots,
     selectedSlotId,
     onSlotSelect,
-    isLoadingSlots
+    isLoadingSlots,
+    slotsError
 }: ScheduleStepProps) {
     const [viewDate, setViewDate] = useState(new Date());
 
@@ -90,12 +88,12 @@ export default function ScheduleStep({
                                     disabled={isPast}
                                     onClick={() => onDateSelect(day)}
                                     className={`relative h-10 w-10 text-sm font-bold rounded-xl transition-all ${isSelected
-                                            ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
-                                            : isToday
-                                                ? "bg-primary/5 text-primary"
-                                                : isPast
-                                                    ? "text-slate-200 cursor-not-allowed"
-                                                    : "text-slate-600 hover:bg-slate-50"
+                                        ? "bg-primary text-white shadow-lg shadow-primary/20 scale-105"
+                                        : isToday
+                                            ? "bg-primary/5 text-primary"
+                                            : isPast
+                                                ? "text-slate-200 cursor-not-allowed"
+                                                : "text-slate-600 hover:bg-slate-50"
                                         }`}
                                 >
                                     {day.getDate()}
@@ -109,22 +107,42 @@ export default function ScheduleStep({
                 <div className="w-full lg:w-1/2">
                     <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-4">Available Slots</p>
 
+                    {slotsError && (
+                        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm font-medium mb-4">
+                            {slotsError}
+                        </div>
+                    )}
+
+                    {!isLoadingSlots && Array.isArray(slots) && slots.length === 0 && selectedDate && (
+                        <div className="py-8 text-center text-slate-400 text-sm font-medium">
+                            <span className="material-symbols-outlined text-2xl mb-2 block">event_busy</span>
+                            No available slots for this date. Please try another day.
+                        </div>
+                    )}
+
+                    {!isLoadingSlots && !selectedDate && (
+                        <div className="py-8 text-center text-slate-400 text-sm font-medium">
+                            <span className="material-symbols-outlined text-2xl mb-2 block">calendar_month</span>
+                            Select a date to see available slots.
+                        </div>
+                    )}
+
                     {isLoadingSlots ? (
                         <div className="grid grid-cols-2 gap-3">
                             {[1, 2, 3, 4].map(i => <div key={i} className="h-12 bg-slate-50 animate-pulse rounded-xl" />)}
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-3">
-                            {slots.map((slot) => (
+                            {(Array.isArray(slots) ? slots : []).map((slot) => (
                                 <button
                                     key={slot.id}
                                     disabled={!slot.isAvailable}
                                     onClick={() => onSlotSelect(slot)}
                                     className={`py-3.5 px-4 rounded-xl text-sm font-bold transition-all border-2 ${selectedSlotId === slot.id
-                                            ? "border-primary bg-white text-primary shadow-lg shadow-primary/5"
-                                            : slot.isAvailable
-                                                ? "border-slate-50 bg-slate-50 text-slate-600 hover:border-primary/20 hover:bg-white"
-                                                : "border-slate-50 bg-slate-50 text-slate-300 cursor-not-allowed opacity-50"
+                                        ? "border-primary bg-white text-primary shadow-lg shadow-primary/5"
+                                        : slot.isAvailable
+                                            ? "border-slate-50 bg-slate-50 text-slate-600 hover:border-primary/20 hover:bg-white"
+                                            : "border-slate-50 bg-slate-50 text-slate-300 cursor-not-allowed opacity-50"
                                         }`}
                                 >
                                     {slot.startTime}

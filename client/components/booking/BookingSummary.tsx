@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 interface BookingSummaryProps {
-    treatment: { title: string; price: number } | null;
+    treatment: { name: string; priceRange: string } | null;
     specialist: { name: string } | null;
     date: Date | null;
     slot: { startTime: string } | null;
@@ -53,7 +53,8 @@ export default function BookingSummary({
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    const subtotal = treatment?.price || 0;
+    const parsedPrice = treatment?.priceRange ? parseInt(treatment.priceRange.replace(/\D/g, '')) : 0;
+    const subtotal = parsedPrice || 0;
     const credit = subtotal > 0 ? 50 : 0; // Concierge credit demo
     const total = Math.max(0, subtotal - credit);
 
@@ -66,9 +67,9 @@ export default function BookingSummary({
                     <div className="flex justify-between items-start">
                         <div className="space-y-1">
                             <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em]">Service</p>
-                            <p className="font-bold text-slate-700 text-sm">{treatment ? treatment.title : "Not selected"}</p>
+                            <p className="font-bold text-slate-700 text-sm">{treatment ? treatment.name : "Not selected"}</p>
                         </div>
-                        <p className="font-bold text-slate-900 text-sm">{treatment ? `$${treatment.price}` : "—"}</p>
+                        <p className="font-bold text-slate-900 text-sm">{treatment ? treatment.priceRange : "—"}</p>
                     </div>
 
                     <div className="flex justify-between items-start">
@@ -112,12 +113,14 @@ export default function BookingSummary({
                 <button
                     onClick={onConfirm}
                     disabled={!treatment || !specialist || !date || !slot || isSubmitting}
-                    className={`w-full py-5 rounded-2xl font-bold text-lg transition-all duration-300 shadow-xl ${!treatment || !specialist || !date || !slot || isSubmitting
-                            ? "bg-slate-100 text-slate-300 cursor-not-allowed shadow-none"
-                            : "bg-primary text-white hover:bg-primary/95 shadow-primary/20 active:scale-[0.98]"
+                    className={`w-full py-5 rounded-2xl font-bold text-lg transition-all duration-300 shadow-xl flex items-center justify-center gap-2 ${!treatment || !specialist || !date || !slot || isSubmitting
+                        ? "bg-slate-100 text-slate-300 cursor-not-allowed shadow-none"
+                        : "bg-primary text-white hover:bg-primary/95 shadow-primary/20 active:scale-[0.98]"
                         }`}
                 >
-                    {isSubmitting ? "Processing..." : "Confirm Appointment"}
+                    {isSubmitting ? "Redirecting to Payment..." : (
+                        <>Proceed to Payment <span className="text-xl">→</span></>
+                    )}
                 </button>
 
                 <p className="text-center text-[10px] text-slate-400 font-medium leading-relaxed">

@@ -74,6 +74,7 @@ export const login = async (req: Request, res: Response) => {
             httpOnly: true,
             sameSite: 'lax',
             secure: false, // true in production
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         });
 
         return res.status(200).json({ message: 'Login successful' });
@@ -91,4 +92,18 @@ export const logout = async (req: Request, res: Response) => {
         secure: false, // true in production
     });
     res.status(200).json({ message: 'Logged out successfully' });
+};
+
+export const getMe = async (req: any, res: Response) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user!.id },
+            select: { id: true, name: true, email: true, phone: true, role: true }
+        });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        res.json(user);
+    } catch (error) {
+        console.error('getMe error:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };

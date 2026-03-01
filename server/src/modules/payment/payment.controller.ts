@@ -168,3 +168,51 @@ export async function refundPayment(req: AuthRequest, res: Response) {
         );
     }
 }
+
+// ─── GET /api/payments/details ───────────────────────────────────────────────
+
+export async function getPaymentDetails(req: AuthRequest, res: Response) {
+    try {
+        const { slotId, treatmentId, dentistId } = req.query as Record<string, string>;
+
+        if (!slotId || !treatmentId) {
+            return res.status(400).json(errorResponse('VALIDATION_ERROR', 'slotId and treatmentId are required'));
+        }
+
+        const [slot, treatment, dentist] = await Promise.all([
+            prisma.slot.findUnique({ where: { id: slotId } }),
+            prisma.treatment.findUnique({ where: { id: treatmentId } }),
+            dentistId ? prisma.dentist.findUnique({
+                where: { id: dentistId },
+                include: { user: { select: { name: true } } }
+            }) : null
+        ]);
+
+        if (!slot || !treatment) {
+            return res.status(404).json(errorResponse('NOT_FOUND', 'Slot or treatment not found'));
+        }
+
+        return res.status(200).json(successResponse({
+            slot: {
+                id: slot.id,
+                date: slot.date,
+                startTime: slot.startTime,
+                endTime: slot.endTime
+            },
+            treatment: {
+                id: treatment.id,
+                title: treatment.name,
+                price: treatment.priceRange ? parseFloat(treatment.priceRange) : 0,
+                duration: 60
+            },
+            dentist: dentist ? {
+                id: dentist.id,
+                name: (dentist as any).user?.name || 'Doctor',
+                specialization: dentist.specialization
+            } : null
+        }));
+    } catch (error) {
+        console.error('[GET_PAYMENT_DETAILS_ERROR]', error);
+        return res.status(500).json(errorResponse('INTERNAL_ERROR', 'Failed to fetch payment details'));
+    }
+}

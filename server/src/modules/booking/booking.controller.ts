@@ -28,7 +28,7 @@ export async function getSlots(req: Request, res: Response) {
             date as string | undefined
         );
 
-        return res.status(200).json(successResponse(slots));
+        return res.status(200).json(slots);
     } catch (error) {
         console.error('[GET_SLOTS_ERROR]', error);
         return res.status(500).json(

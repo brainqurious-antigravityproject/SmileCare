@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function apiFetch<T>(
     endpoint: string,
@@ -7,6 +7,7 @@ export async function apiFetch<T>(
     const url = `${API_URL}${endpoint}`;
 
     const response = await fetch(url, {
+        credentials: "include",   // Always send cookies (accessToken)
         ...options,
         headers: {
             "Content-Type": "application/json",
@@ -16,7 +17,11 @@ export async function apiFetch<T>(
 
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || response.statusText || "Something went wrong");
+        const err = new Error(
+            errorData.message || response.statusText || "Something went wrong"
+        ) as any;
+        err.status = response.status;
+        throw err;
     }
 
     return response.json();

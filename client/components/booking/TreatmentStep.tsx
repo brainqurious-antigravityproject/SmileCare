@@ -2,11 +2,11 @@
 
 interface Treatment {
     id: string;
-    title: string;
+    name: string;
     description: string;
-    price: number;
-    duration: number;
-    icon: string;
+    priceRange: string;
+    imageUrl?: string | null;
+    category?: { name: string };
 }
 
 interface TreatmentStepProps {
@@ -43,13 +43,13 @@ export default function TreatmentStep({ treatments, selectedId, onSelect, isLoad
                             key={treatment.id}
                             onClick={() => onSelect(treatment)}
                             className={`group relative cursor-pointer overflow-hidden rounded-2xl border-2 p-6 transition-all duration-300 ${isSelected
-                                    ? "border-primary bg-white shadow-xl shadow-primary/5"
-                                    : "border-slate-100 bg-white hover:border-primary/20 hover:shadow-md"
+                                ? "border-primary bg-white shadow-xl shadow-primary/5"
+                                : "border-slate-100 bg-white hover:border-primary/20 hover:shadow-md"
                                 }`}
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <span className={`material-symbols-outlined text-3xl ${isSelected ? "text-primary" : "text-slate-400 group-hover:text-primary"} transition-colors`}>
-                                    {treatment.icon || "medical_services"}
+                                    {"medical_services"}
                                 </span>
                                 {isSelected && (
                                     <div className="bg-primary text-white size-6 rounded-full flex items-center justify-center shadow-lg shadow-primary/20">
@@ -58,13 +58,13 @@ export default function TreatmentStep({ treatments, selectedId, onSelect, isLoad
                                 )}
                             </div>
 
-                            <h4 className="font-display font-bold text-lg mb-1">{treatment.title}</h4>
+                            <h4 className="font-display font-bold text-lg mb-1">{treatment.name}</h4>
                             <p className="text-sm text-slate-500 mb-4 leading-relaxed line-clamp-2">
                                 {treatment.description || "Premium clinical restoration performed by vetted specialists."}
                             </p>
 
                             <p className="text-primary font-bold text-sm tracking-tight">
-                                {treatment.duration} min • ${treatment.price}
+                                {treatment.priceRange}
                             </p>
                         </div>
                     );
