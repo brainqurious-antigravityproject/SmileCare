@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const HeroSection = () => {
     return (
@@ -24,12 +25,12 @@ const HeroSection = () => {
                         Experience world-class dental care with state-of-the-art technology and a team dedicated to your comfort and smile.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <button className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-primary transition-all shadow-xl active:scale-95">
+                        <Link href="/booking" className="bg-primary text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-primary transition-all shadow-xl active:scale-95 text-center">
                             Book an Appointment
-                        </button>
-                        <button className="bg-transparent border-2 border-accent-gold text-accent-gold px-8 py-4 rounded-full font-bold text-lg hover:bg-accent-gold hover:text-navy-deep transition-all active:scale-95">
+                        </Link>
+                        <Link href="/treatments" className="bg-transparent border-2 border-accent-gold text-accent-gold px-8 py-4 rounded-full font-bold text-lg hover:bg-accent-gold hover:text-navy-deep transition-all active:scale-95 text-center">
                             Our Services
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Stats/Badges */}

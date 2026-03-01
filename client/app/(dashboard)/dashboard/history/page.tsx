@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { History, FileDown, Loader2 } from "lucide-react";
+import { getLocalHistoryBookings, getLocalBookings } from "@/lib/booking-storage";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -29,8 +30,25 @@ export default function HistoryPage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(`${API}/api/patient/appointments/history`, { credentials: "include" }).catch(() => null);
-                if (res?.ok) setHistory(await res.json());
+                const res = await fetch(
+                    `${API}/api/patient/appointments/history`,
+                    { credentials: "include" }
+                ).catch(() => null);
+
+                const localHistory = getLocalBookings(); // show all local as fallback
+
+                if (res?.ok) {
+                    const serverData = await res.json();
+                    if (serverData.length > 0) {
+                        setHistory(serverData);
+                    } else if (localHistory.length > 0) {
+                        setHistory(localHistory);
+                    } else {
+                        setHistory(mockHistory);
+                    }
+                } else {
+                    setHistory(localHistory.length > 0 ? localHistory : mockHistory);
+                }
             } catch { /* mock fallback */ }
             setLoading(false);
         };

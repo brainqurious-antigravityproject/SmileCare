@@ -10,6 +10,7 @@ import {
     Loader2,
     AlertTriangle,
 } from "lucide-react";
+import { getLocalUpcomingBookings } from "@/lib/booking-storage";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -31,8 +32,25 @@ export default function AppointmentsPage() {
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(`${API}/api/patient/appointments/upcoming`, { credentials: "include" }).catch(() => null);
-                if (res?.ok) setAppointments(await res.json());
+                const res = await fetch(
+                    `${API}/api/patient/appointments/upcoming`,
+                    { credentials: "include" }
+                ).catch(() => null);
+
+                const localUpcoming = getLocalUpcomingBookings();
+
+                if (res?.ok) {
+                    const serverData = await res.json();
+                    if (serverData.length > 0) {
+                        setAppointments(serverData);
+                    } else if (localUpcoming.length > 0) {
+                        setAppointments(localUpcoming);
+                    } else {
+                        setAppointments(mockUpcoming);
+                    }
+                } else {
+                    setAppointments(localUpcoming.length > 0 ? localUpcoming : mockUpcoming);
+                }
             } catch { /* mock fallback */ }
             setLoading(false);
         };

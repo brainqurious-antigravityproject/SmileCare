@@ -1,13 +1,6 @@
 "use client";
 
-interface Treatment {
-    id: string;
-    name: string;
-    description: string;
-    priceRange: string;
-    imageUrl?: string | null;
-    category?: { name: string };
-}
+import { Treatment } from "@/lib/booking.api";
 
 interface TreatmentStepProps {
     treatments: Treatment[];

@@ -2,12 +2,7 @@
 
 import Image from "next/image";
 
-interface Specialist {
-    id: string;
-    name: string;
-    specialization: string;
-    photoUrl?: string | null;
-}
+import { Specialist } from "@/lib/booking.api";
 
 interface SpecialistStepProps {
     specialists: Specialist[];

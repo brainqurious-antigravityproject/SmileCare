@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Serif, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 const notoSerif = Noto_Serif({
   variable: "--font-noto-serif",
@@ -34,9 +35,11 @@ export default function RootLayout({
       <body
         className={`${notoSerif.variable} ${notoSans.variable} antialiased font-body bg-background-light text-slate-900 min-h-screen`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

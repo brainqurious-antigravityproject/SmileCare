@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -29,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const { success, error: toastError } = useToast();
 
     const refreshUser = async () => {
         try {
@@ -65,9 +67,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (!res.ok) {
             const data = await res.json();
-            throw new Error(data.message || "Login failed");
+            const msg = data.message || "Login failed";
+            toastError("Login Failed", msg);
+            throw new Error(msg);
         }
         await refreshUser();
+        success("Welcome back!", "You've been logged in successfully.");
         router.push("/dashboard");
     };
 
@@ -80,7 +85,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
         if (!res.ok) {
             const data = await res.json();
-            throw new Error(data.message || "Registration failed");
+            const msg = data.message || "Registration failed";
+            toastError("Registration Failed", msg);
+            throw new Error(msg);
         }
         await login(email, password);
     };
@@ -91,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             credentials: "include",
         }).catch(() => null);
         setUser(null);
+        success("Logged Out", "You've been signed out successfully.");
         router.push("/");
     };
 

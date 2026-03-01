@@ -3,6 +3,22 @@ import Link from "next/link";
 const Footer = () => {
     const currentYear = new Date().getFullYear();
 
+    const quickLinks = [
+        { label: "Home", href: "/" },
+        { label: "Treatments", href: "/treatments" },
+        { label: "About Us", href: "/about" },
+        { label: "Blog", href: "/blog" },
+        { label: "Contact", href: "/contact" },
+    ];
+
+    const treatmentLinks = [
+        { label: "Invisalign", href: "/treatments#invisalign" },
+        { label: "Dental Implants", href: "/treatments#implants" },
+        { label: "Teeth Whitening", href: "/treatments#whitening" },
+        { label: "Root Canal", href: "/treatments#root-canal" },
+        { label: "Cosmetic Dentistry", href: "/treatments#cosmetic" },
+    ];
+
     return (
         <footer className="bg-navy-deep text-white pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,10 +45,10 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-bold mb-6 text-accent-gold">Quick Links</h4>
                         <ul className="space-y-4">
-                            {["Home", "Treatments", "About Us", "Smile Gallery", "Contact"].map((link) => (
-                                <li key={link}>
-                                    <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                        {link}
+                            {quickLinks.map((link) => (
+                                <li key={link.label}>
+                                    <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                                        {link.label}
                                     </Link>
                                 </li>
                             ))}
@@ -43,10 +59,10 @@ const Footer = () => {
                     <div>
                         <h4 className="text-lg font-bold mb-6 text-accent-gold">Treatments</h4>
                         <ul className="space-y-4">
-                            {["Invisalign", "Dental Implants", "Teeth Whitening", "Root Canal", "Cosmetic Dentistry"].map((treatment) => (
-                                <li key={treatment}>
-                                    <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                        {treatment}
+                            {treatmentLinks.map((link) => (
+                                <li key={link.label}>
+                                    <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                                        {link.label}
                                     </Link>
                                 </li>
                             ))}
@@ -76,8 +92,8 @@ const Footer = () => {
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
                     <p>© {currentYear} SmileCare Dental Clinic. All rights reserved.</p>
                     <div className="flex space-x-6 mt-4 md:mt-0">
-                        <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
                     </div>
                 </div>
             </div>

@@ -19,6 +19,8 @@ import {
     Award,
     Loader2,
 } from "lucide-react";
+import { getLocalUpcomingBookings, getLocalBookings } from "@/lib/booking-storage";
+import { useAuth } from "@/context/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -66,6 +68,7 @@ function formatDate(d: string) {
 }
 
 export default function DashboardPage() {
+    const { user } = useAuth();
     const [profile, setProfile] = useState<any>(mockProfile);
     const [upcoming, setUpcoming] = useState<any[]>(mockUpcoming);
     const [history, setHistory] = useState<any[]>(mockHistory);
@@ -81,9 +84,45 @@ export default function DashboardPage() {
                     fetch(`${API}/api/patient/appointments/history`, { credentials: "include" }).catch(() => null),
                     fetch(`${API}/api/patient/documents`, { credentials: "include" }).catch(() => null),
                 ]);
-                if (pRes?.ok) setProfile(await pRes.json());
-                if (uRes?.ok) setUpcoming(await uRes.json());
-                if (hRes?.ok) { const h = await hRes.json(); setHistory(h.slice(0, 3)); }
+
+                if (pRes?.ok) {
+                    setProfile(await pRes.json());
+                } else if (user) {
+                    // Use auth context user as fallback profile
+                    setProfile({
+                        name: user.name,
+                        email: user.email,
+                        loyaltyPoints: 0,
+                        membership: "Standard",
+                    });
+                }
+
+                const localUpcoming = getLocalUpcomingBookings();
+
+                if (uRes?.ok) {
+                    const serverUpcoming = await uRes.json();
+                    // Merge: server data takes precedence, local fills gaps
+                    if (serverUpcoming.length > 0) {
+                        setUpcoming(serverUpcoming);
+                    } else if (localUpcoming.length > 0) {
+                        setUpcoming(localUpcoming);
+                    }
+                } else {
+                    // API failed or offline — use sessionStorage
+                    if (localUpcoming.length > 0) {
+                        setUpcoming(localUpcoming);
+                    }
+                }
+
+                if (hRes?.ok) {
+                    const h = await hRes.json();
+                    setHistory(h.slice(0, 3));
+                } else {
+                    // Show recently confirmed (local) as history fallback
+                    const localAll = getLocalBookings().slice(0, 3);
+                    if (localAll.length > 0) setHistory(localAll);
+                }
+
                 if (dRes?.ok) { const d = await dRes.json(); setDocs(d.slice(0, 3)); }
             } catch { /* fallback to mock */ }
             setLoading(false);
@@ -180,6 +219,24 @@ export default function DashboardPage() {
                                 </div>
                             </div>
                         </section>
+                    )}
+
+                    {!first && (
+                        <div className="bg-white rounded-2xl border-2 border-dashed border-primary/15 p-10 text-center">
+                            <CalendarPlus size={40} className="text-primary/20 mx-auto mb-4" />
+                            <h3 className="text-lg font-bold text-primary mb-2">
+                                No Upcoming Appointments
+                            </h3>
+                            <p className="text-primary/40 text-sm mb-6">
+                                Book your next visit with one of our world-class specialists.
+                            </p>
+                            <Link
+                                href="/booking"
+                                className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                            >
+                                Book Appointment
+                            </Link>
+                        </div>
                     )}
 
                     {/* Grid: History + Documents */}

@@ -7,18 +7,21 @@ const treatments = [
         description: "Transform your smile with veneers, bonding, and aesthetic contouring tailored to your face.",
         image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800",
         badge: "Popular",
+        slug: "cosmetic",
     },
     {
         title: "Dental Implants",
         description: "Permanent, natural-looking solutions for missing teeth using the highest quality titanium.",
         image: "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?auto=format&fit=crop&q=80&w=800",
         badge: "Advanced",
+        slug: "implants",
     },
     {
         title: "Invisalign",
         description: "Straighten your teeth discreetly with clear, removable aligners that fit your lifestyle.",
         image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800",
         badge: "Most Choice",
+        slug: "invisalign",
     }
 ];
 
@@ -66,7 +69,7 @@ const FeaturedTreatments = () => {
                                 </p>
 
                                 <div className="mt-auto">
-                                    <Link href="#" className="flex items-center gap-2 text-primary font-bold group/link">
+                                    <Link href={`/treatments#${item.slug}`} className="flex items-center gap-2 text-primary font-bold group/link inline-flex">
                                         <span>View Treatment</span>
                                         <div className="w-8 h-px bg-primary transform origin-left transition-all duration-300 group-hover/link:w-12 group-hover/link:bg-accent-gold" />
                                         <svg className="w-4 h-4 transform group-hover/link:translate-x-1 group-hover/link:text-accent-gold transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,9 +83,9 @@ const FeaturedTreatments = () => {
                 </div>
 
                 <div className="mt-16 text-center">
-                    <button className="bg-transparent border-2 border-navy-deep text-navy-deep px-10 py-4 rounded-full font-bold hover:bg-navy-deep hover:text-white transition-all active:scale-95">
+                    <Link href="/treatments" className="inline-block bg-transparent border-2 border-navy-deep text-navy-deep px-10 py-4 rounded-full font-bold hover:bg-navy-deep hover:text-white transition-all active:scale-95">
                         View All Treatments
-                    </button>
+                    </Link>
                 </div>
             </div>
         </section>

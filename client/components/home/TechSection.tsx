@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const TechSection = () => {
     const features = [
@@ -70,12 +71,12 @@ const TechSection = () => {
                         </ul>
 
                         <div className="pt-4">
-                            <button className="flex items-center gap-3 text-primary font-bold group">
+                            <Link href="/about" className="flex items-center gap-3 text-primary font-bold group inline-flex">
                                 <span>Learn More About Our Tech</span>
                                 <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                 </svg>
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

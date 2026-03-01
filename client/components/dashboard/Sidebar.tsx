@@ -15,16 +15,21 @@ import {
     LogOut,
     Menu,
     X,
+    User,
+    CalendarCheck,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
     { label: "Overview", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Appointments", icon: CalendarDays, href: "/dashboard/appointments" },
+    { label: "My Bookings", icon: CalendarDays, href: "/dashboard/bookings" },
+    { label: "Appointments", icon: CalendarCheck, href: "/dashboard/appointments" },
     { label: "History", icon: History, href: "/dashboard/history" },
     { label: "Documents", icon: FileText, href: "/dashboard/documents" },
 ];
 
 const accountItems = [
+    { label: "Profile", icon: User, href: "/dashboard/profile" },
     { label: "Settings", icon: Settings, href: "/dashboard/settings" },
     { label: "Support", icon: HelpCircle, href: "/dashboard/support" },
 ];
@@ -32,6 +37,7 @@ const accountItems = [
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function Sidebar() {
+    const { user } = useAuth();
     const [open, setOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
@@ -149,18 +155,16 @@ export default function Sidebar() {
                     </Link>
 
                     <div className="mt-6 p-3 bg-primary/5 rounded-xl flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden relative shrink-0 bg-primary/10">
-                            <Image
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-oZ3mIeMUTEOiX2JSp4OxxTix9S6JpWdD-V2Oodi5EMmqrZeF8lSnaQXtbqb1qk2It4dcQKU0XL415vAS_tQmio_aWj54Hxy-Y4kODpO-Y6BoiJFe9YrC3DIKY551EnWOX4rwGgVGrlzw9wnEIoA1bv4qVz2Kz5Haw3Ef4F-IszGFcXEUPtXcbAMY5sipuQQR5t1OaVzXqqA5vtP_eP2IzCUIGgtNyKKf0J9D3Mp4OEblM4rsFDl_DVQCABSpVmsPh9YaQRhIlWUG"
-                                alt="Alex Sterling"
-                                fill
-                                className="object-cover"
-                                unoptimized
-                            />
+                        <div className="size-10 rounded-full bg-primary flex items-center justify-center shrink-0 text-white font-bold text-sm">
+                            {user?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-primary truncate">Alex Sterling</p>
-                            <p className="text-[10px] text-primary/40 uppercase tracking-tight">Premium Member</p>
+                            <p className="text-sm font-bold text-primary truncate">
+                                {user?.name || "Guest User"}
+                            </p>
+                            <p className="text-[10px] text-primary/40 uppercase tracking-tight">
+                                {user?.role === "admin" ? "Admin" : "Patient"}
+                            </p>
                         </div>
                         <button onClick={handleLogout} className="text-primary/30 hover:text-primary transition-colors" aria-label="Logout">
                             <LogOut size={18} />

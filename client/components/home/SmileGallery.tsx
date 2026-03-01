@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useRef } from "react";
 
 const gallery = [
     { title: "Invisalign Result", category: "Orthodontics", image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?auto=format&fit=crop&q=80&w=800" },
@@ -11,6 +13,16 @@ const gallery = [
 ];
 
 const SmileGallery = () => {
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const scroll = (direction: "left" | "right") => {
+        if (scrollRef.current) {
+            const { scrollLeft, clientWidth } = scrollRef.current;
+            const scrollTo = direction === "left" ? scrollLeft - clientWidth / 2 : scrollLeft + clientWidth / 2;
+            scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
+        }
+    };
+
     return (
         <section className="py-24 bg-navy-deep text-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 flex flex-col md:flex-row justify-between items-end gap-6">
@@ -21,17 +33,23 @@ const SmileGallery = () => {
                     </h2>
                 </div>
                 <div className="flex gap-4">
-                    <button className="hidden md:flex items-center justify-center w-12 h-12 rounded-full border border-white/20 hover:bg-white/10 transition-colors">
+                    <button
+                        onClick={() => scroll("left")}
+                        className="hidden md:flex items-center justify-center w-12 h-12 rounded-full border border-white/20 hover:bg-white/10 transition-colors"
+                    >
                         ←
                     </button>
-                    <button className="hidden md:flex items-center justify-center w-12 h-12 rounded-full border border-white/20 hover:bg-white/10 transition-colors">
+                    <button
+                        onClick={() => scroll("right")}
+                        className="hidden md:flex items-center justify-center w-12 h-12 rounded-full border border-white/20 hover:bg-white/10 transition-colors"
+                    >
                         →
                     </button>
                 </div>
             </div>
 
             <div className="relative pl-4 sm:pl-6 lg:pl-[max(1rem,calc((100vw-1280px)/2+1rem))]">
-                <div className="flex gap-8 overflow-x-auto pb-8 no-scrollbar snap-x snap-mandatory">
+                <div ref={scrollRef} className="flex gap-8 overflow-x-auto pb-8 no-scrollbar snap-x snap-mandatory scroll-smooth">
                     {gallery.map((item, idx) => (
                         <div
                             key={idx}
@@ -44,19 +62,19 @@ const SmileGallery = () => {
                                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                             />
                             {/* Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent opacity-60 group-hover:opacity-90 transition-opacity" />
 
                             {/* Content */}
                             <div className="absolute bottom-0 left-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform">
                                 <span className="inline-block px-3 py-1 bg-accent-gold text-navy-deep text-[10px] font-bold uppercase tracking-wider rounded-full mb-3">
                                     {item.category}
                                 </span>
-                                <h4 className="text-xl md:text-2xl font-bold">{item.title}</h4>
-                                <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button className="text-accent-gold font-bold text-sm tracking-widest uppercase flex items-center gap-2">
-                                        View Case Detail
+                                <h4 className="text-xl md:text-2xl font-bold mb-4">{item.title}</h4>
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Link href="/booking" className="text-accent-gold font-bold text-sm tracking-widest uppercase flex items-center gap-2 hover:text-white transition-colors">
+                                        Book This Treatment
                                         <span>↗</span>
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +83,6 @@ const SmileGallery = () => {
                     <div className="flex-shrink-0 w-8" />
                 </div>
             </div>
-
         </section>
     );
 };

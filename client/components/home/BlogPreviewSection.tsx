@@ -1,24 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-
-const articles = [
-    {
-        title: "The Future of Dental Care: Digital Dentistry and AI",
-        excerpt: "Discover how AI is revolutionizing diagnostic accuracy and treatment planning in modern dental clinics.",
-        category: "Technology",
-        date: "May 15, 2024",
-        image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"
-    },
-    {
-        title: "5 Tips for Maintaining Your Teeth Whitening Results",
-        excerpt: "Learn the best practices to keep your smile bright and radiant for months after your professional treatment.",
-        category: "Tips & Care",
-        date: "May 10, 2024",
-        image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=800"
-    }
-];
+import { BLOG_ARTICLES } from "@/lib/blog-data";
 
 const BlogPreviewSection = () => {
+    // Show only the first 2 articles on the homepage
+    const recentArticles = BLOG_ARTICLES.slice(0, 2);
+
     return (
         <section className="py-24 bg-background-light">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,7 +17,7 @@ const BlogPreviewSection = () => {
                         </h2>
                     </div>
                     <div>
-                        <Link href="#" className="flex items-center gap-2 text-primary font-bold group">
+                        <Link href="/blog" className="flex items-center gap-2 text-primary font-bold group inline-flex">
                             <span>Visit Our Full Blog</span>
                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
                                 <svg className="w-5 h-5 leading-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,7 +29,7 @@ const BlogPreviewSection = () => {
                 </div>
 
                 <div className="space-y-8">
-                    {articles.map((article, idx) => (
+                    {recentArticles.map((article, idx) => (
                         <div key={idx} className="group bg-white rounded-[2rem] overflow-hidden flex flex-col md:flex-row hover:shadow-2xl transition-all duration-500 border border-gray-100">
                             {/* Thumbnail */}
                             <div className="md:w-1/3 relative h-[250px] md:h-auto overflow-hidden">
@@ -62,7 +49,7 @@ const BlogPreviewSection = () => {
                                 <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
                                     <span>{article.date}</span>
                                     <span className="w-1 h-1 rounded-full bg-gray-300" />
-                                    <span>5 min read</span>
+                                    <span>{article.readTime}</span>
                                 </div>
                                 <h3 className="text-2xl md:text-3xl font-display font-bold text-navy-deep mb-4 group-hover:text-primary transition-colors leading-tight">
                                     {article.title}
@@ -71,7 +58,7 @@ const BlogPreviewSection = () => {
                                     {article.excerpt}
                                 </p>
                                 <div className="mt-auto">
-                                    <Link href="#" className="inline-flex items-center gap-2 text-navy-deep font-bold border-b-2 border-accent-gold/30 hover:border-accent-gold transition-all pb-1 group/link">
+                                    <Link href={`/blog/${article.slug}`} className="inline-flex items-center gap-2 text-navy-deep font-bold border-b-2 border-accent-gold/30 hover:border-accent-gold transition-all pb-1 group/link">
                                         Read Article
                                         <svg className="w-4 h-4 transform group-hover/link:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />

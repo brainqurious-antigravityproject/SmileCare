@@ -8,6 +8,7 @@ import {
     Loader2, CheckCircle2, XCircle, CreditCard, Shield, Lock,
     ChevronRight, Clock, Smartphone, Building2, Wallet, AlertTriangle
 } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -64,6 +65,7 @@ export default function PaymentPage() {
     const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
     const [activeTab, setActiveTab] = useState<PaymentTab>("card");
     const [processingMsg, setProcessingMsg] = useState(0);
+    const { success, error: toastError, warning } = useToast();
 
     // Timer
     const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes
@@ -98,11 +100,26 @@ export default function PaymentPage() {
                 setPaymentData(JSON.parse(raw));
             } else {
                 setPageState("error");
+                // Toast shown after mount
             }
         } catch {
             setPageState("error");
+            // Toast shown after mount
         }
     }, []);
+
+    useEffect(() => {
+        if (pageState === "error") {
+            // slight delay so ToastProvider has mounted
+            const t = setTimeout(() => {
+                toastError(
+                    "No Booking Found",
+                    "Please complete the booking form before proceeding to payment."
+                );
+            }, 300);
+            return () => clearTimeout(t);
+        }
+    }, [pageState, toastError]);
 
     // ─── Countdown Timer ─────────────────────────────────────────────────────
 
@@ -110,6 +127,10 @@ export default function PaymentPage() {
         if (pageState !== "form") return;
         if (timeLeft <= 0) {
             setPageState("expired");
+            warning(
+                "Payment Session Expired",
+                "Your reserved slot has been released. Please book again."
+            );
             return;
         }
         const interval = setInterval(() => {
@@ -117,13 +138,17 @@ export default function PaymentPage() {
                 if (t <= 1) {
                     clearInterval(interval);
                     setPageState("expired");
+                    warning(
+                        "Payment Session Expired",
+                        "Your reserved slot has been released. Please book again."
+                    );
                     return 0;
                 }
                 return t - 1;
             });
         }, 1000);
         return () => clearInterval(interval);
-    }, [pageState, timeLeft]);
+    }, [pageState, timeLeft, warning]);
 
     const formatTimer = (secs: number) => {
         const m = Math.floor(secs / 60);
@@ -213,18 +238,83 @@ export default function PaymentPage() {
 
             if (res.ok) {
                 const data = await res.json();
-                setPaymentId(data.data?.payment?.id || `pay_${Date.now()}`);
-                setBookingId(data.data?.booking?.id || "");
-                sessionStorage.setItem("smilecare_booking", JSON.stringify(data.data));
+                const pid = data.data?.payment?.id || `pay_${Date.now()}`;
+                const bid = data.data?.booking?.id || `book_${Date.now()}`;
+                setPaymentId(pid);
+                setBookingId(bid);
+
+                // Save enriched booking record for dashboard
+                const enrichedBooking = {
+                    id: bid,
+                    paymentId: pid,
+                    treatment: paymentData.treatment?.title || "Dental Treatment",
+                    treatmentId: paymentData.treatment?.id || paymentData.treatmentId,
+                    doctor: paymentData.specialist?.name || "Our Specialist",
+                    specialization: paymentData.specialist?.specialty || "Dentistry",
+                    date: paymentData.date,
+                    startTime: paymentData.slot?.startTime || "TBD",
+                    status: "confirmed",
+                    paymentAmount: total,
+                    paymentStatus: "captured",
+                    confirmedAt: new Date().toISOString(),
+                };
+
+                // Merge with existing confirmed bookings list
+                const existing = JSON.parse(
+                    sessionStorage.getItem("smilecare_confirmed_bookings") || "[]"
+                );
+                existing.unshift(enrichedBooking);  // newest first
+                sessionStorage.setItem(
+                    "smilecare_confirmed_bookings",
+                    JSON.stringify(existing)
+                );
+                sessionStorage.removeItem("smilecare_booking");
+
+                success("Payment Successful!", "Your appointment has been confirmed.");
             } else {
+                const errData = await res.json().catch(() => ({}));
+                const msg = errData?.error?.message || errData?.message || "Payment verification failed";
+                toastError("Payment Failed", msg);
                 setPaymentId(`pay_${Date.now()}`);
             }
-        } catch {
-            setPaymentId(`pay_${Date.now()}`);
+        } catch (err: any) {
+            toastError(
+                "Network Error",
+                "Could not reach the payment server. Please check your connection."
+            );
+
+            // Still allow success UI for demo — save mock booking
+            const pid = `pay_${Date.now()}`;
+            const bid = `book_${Date.now()}`;
+            setPaymentId(pid);
+            setBookingId(bid);
+
+            const enrichedBooking = {
+                id: bid,
+                paymentId: pid,
+                treatment: paymentData?.treatment?.title || "Dental Treatment",
+                treatmentId: paymentData?.treatment?.id || paymentData?.treatmentId,
+                doctor: paymentData?.specialist?.name || "Our Specialist",
+                specialization: paymentData?.specialist?.specialty || "Dentistry",
+                date: paymentData?.date,
+                startTime: paymentData?.slot?.startTime || "TBD",
+                status: "confirmed",
+                paymentAmount: total,
+                paymentStatus: "captured",
+                confirmedAt: new Date().toISOString(),
+            };
+
+            const existing = JSON.parse(
+                sessionStorage.getItem("smilecare_confirmed_bookings") || "[]"
+            );
+            existing.unshift(enrichedBooking);
+            sessionStorage.setItem(
+                "smilecare_confirmed_bookings",
+                JSON.stringify(existing)
+            );
         }
 
         setPageState("success");
-        sessionStorage.removeItem("smilecare_payment");
     };
 
     // ─── Error State ─────────────────────────────────────────────────────────
@@ -340,7 +430,7 @@ export default function PaymentPage() {
 
                     {/* Actions */}
                     <div className="flex gap-3 mb-6">
-                        <Link href="/dashboard" className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:opacity-90 transition-all">
+                        <Link href="/dashboard/bookings" className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:opacity-90 transition-all">
                             View My Bookings
                         </Link>
                         <Link href="/" className="flex-1 border-2 border-primary/20 text-primary text-center py-3 rounded-xl font-bold hover:bg-primary/5 transition-all">
