@@ -20,7 +20,7 @@ const Header = () => {
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Treatments", href: "/treatments" },
-        { name: "Smile Gallery", href: "/gallery" },
+        { name: "Smile Gallery", href: "/#gallery" },
         { name: "About", href: "/about" },
         { name: "Contact", href: "/contact" },
     ];

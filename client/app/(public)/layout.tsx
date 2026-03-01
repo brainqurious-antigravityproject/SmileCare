@@ -9,9 +9,9 @@ export default function PublicLayout({
     return (
         <div className="min-h-screen bg-background-light flex flex-col">
             <Header />
-            <main className="flex-grow pt-20">
+            <div className="flex-grow pt-20">
                 {children}
-            </main>
+            </div>
             <Footer />
         </div>
     );

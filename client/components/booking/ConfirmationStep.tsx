@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
     Stethoscope,
     UserRound,
     CalendarDays,
+    Clock,
     User,
     Phone,
     Mail,
@@ -14,8 +16,7 @@ import {
     ShieldCheck,
     Timer,
 } from "lucide-react";
-import { useState, useEffect } from "react";
-import type { PatientDetails } from "@/context/BookingContext";
+import type { PatientDetails } from "@/components/booking/PatientDetailsStep";
 
 interface ConfirmationStepProps {
     treatment: { name: string; priceRange: string } | null;
@@ -40,7 +41,7 @@ function InfoRow({
 }) {
     return (
         <div className="flex items-start gap-4">
-            <div className="size-9 bg-primary/8 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+            <div className="size-9 bg-primary/10 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
                 <Icon size={16} className="text-primary" />
             </div>
             <div>
@@ -80,10 +81,9 @@ export default function ConfirmationStep({
         return () => clearInterval(id);
     }, [holdExpiresAt]);
 
-    const parsedPrice =
-        treatment?.priceRange
-            ? parseInt(treatment.priceRange.replace(/[^0-9]/g, ""), 10) || 0
-            : 0;
+    const parsedPrice = treatment?.priceRange
+        ? parseInt(treatment.priceRange.replace(/[^0-9]/g, ""), 10) || 0
+        : 0;
 
     const formattedDate = date
         ? date.toLocaleDateString("en-IN", {
@@ -96,7 +96,6 @@ export default function ConfirmationStep({
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
             <div className="mb-10">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-primary mb-2">
                     Step 5 of 5
@@ -106,16 +105,15 @@ export default function ConfirmationStep({
                 </h2>
                 <p className="text-slate-500 text-base leading-relaxed">
                     Please review all details before proceeding to payment.
-                    You can go back and edit any section.
                 </p>
             </div>
 
-            {/* Hold timer warning */}
+            {/* Hold timer */}
             {holdExpiresAt && timeLeft !== null && (
                 <div
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 mb-6 text-sm font-bold ${timeLeft < 60
-                            ? "bg-red-50 text-red-600 border border-red-200"
-                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 mb-6 text-sm font-bold border ${timeLeft < 60
+                            ? "bg-red-50 text-red-600 border-red-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
                         }`}
                 >
                     <Timer size={16} className="shrink-0" />
@@ -124,14 +122,14 @@ export default function ConfirmationStep({
                         <span className="tabular-nums">
                             {Math.floor(timeLeft / 60)}:
                             {(timeLeft % 60).toString().padStart(2, "0")}
-                        </span>{" "}
-                        — complete payment before it expires
+                        </span>
+                        {" "}— complete payment before it expires
                     </span>
                 </div>
             )}
 
             <div className="space-y-5">
-                {/* Appointment Details card */}
+                {/* Appointment card */}
                 <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
                         <h3 className="font-bold text-slate-900">Appointment</h3>
@@ -143,37 +141,22 @@ export default function ConfirmationStep({
                         </button>
                     </div>
                     <div className="px-8 py-6 grid sm:grid-cols-2 gap-6">
-                        <InfoRow
-                            icon={Stethoscope}
-                            label="Treatment"
-                            value={treatment?.name ?? "—"}
-                        />
+                        <InfoRow icon={Stethoscope} label="Treatment" value={treatment?.name ?? "—"} />
                         <InfoRow
                             icon={UserRound}
                             label="Specialist"
                             value={
                                 specialist
-                                    ? `${specialist.name}${specialist.specialization
-                                        ? ` · ${specialist.specialization}`
-                                        : ""
-                                    }`
+                                    ? `${specialist.name}${specialist.specialization ? ` · ${specialist.specialization}` : ""}`
                                     : "—"
                             }
                         />
-                        <InfoRow
-                            icon={CalendarDays}
-                            label="Date"
-                            value={formattedDate}
-                        />
-                        <InfoRow
-                            icon={Timer}
-                            label="Time"
-                            value={slot?.startTime ?? "—"}
-                        />
+                        <InfoRow icon={CalendarDays} label="Date" value={formattedDate} />
+                        <InfoRow icon={Clock} label="Time" value={slot?.startTime ?? "—"} />
                     </div>
                 </div>
 
-                {/* Patient Details card */}
+                {/* Patient details card */}
                 <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100">
                         <h3 className="font-bold text-slate-900">Your Details</h3>
@@ -185,68 +168,46 @@ export default function ConfirmationStep({
                         </button>
                     </div>
                     <div className="px-8 py-6 grid sm:grid-cols-2 gap-6">
-                        <InfoRow
-                            icon={User}
-                            label="Name"
-                            value={patientDetails?.name ?? "—"}
-                        />
-                        <InfoRow
-                            icon={Phone}
-                            label="Phone"
-                            value={patientDetails?.phone ?? "—"}
-                        />
-                        <InfoRow
-                            icon={Mail}
-                            label="Email"
-                            value={patientDetails?.email ?? "—"}
-                        />
+                        <InfoRow icon={User} label="Name" value={patientDetails?.name ?? "—"} />
+                        <InfoRow icon={Phone} label="Phone" value={patientDetails?.phone ?? "—"} />
+                        <InfoRow icon={Mail} label="Email" value={patientDetails?.email ?? "—"} />
                         {patientDetails?.notes && (
-                            <InfoRow
-                                icon={MessageSquare}
-                                label="Notes"
-                                value={patientDetails.notes}
-                            />
+                            <InfoRow icon={MessageSquare} label="Notes" value={patientDetails.notes} />
                         )}
                     </div>
                 </div>
 
-                {/* Price summary card */}
+                {/* Price card */}
                 <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-8">
                     <div className="flex items-center justify-between mb-4">
                         <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
                             {treatment?.name ?? "Treatment"}
                         </span>
                         <span className="font-bold text-slate-900">
-                            {treatment?.priceRange ?? "—"}
+                            {treatment?.priceRange
+                                ? treatment.priceRange.replace(/[$£€]/g, "₹")
+                                : "—"}
                         </span>
                     </div>
                     <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
-                        <span className="font-display text-xl font-bold text-slate-900">
-                            Total Due
-                        </span>
+                        <span className="font-display text-xl font-bold text-slate-900">Total Due</span>
                         <span className="font-display text-4xl font-black text-primary">
                             {parsedPrice > 0
                                 ? `₹${parsedPrice.toLocaleString("en-IN")}`
-                                : treatment?.priceRange ?? "—"}
+                                : treatment?.priceRange?.replace(/[$£€]/g, "₹") ?? "—"}
                         </span>
                     </div>
                 </div>
 
                 {/* Trust badges */}
                 <div className="grid grid-cols-3 gap-3">
-                    {[
-                        "256-bit SSL Secured",
-                        "Instant Confirmation",
-                        "Free Cancellation 24h",
-                    ].map((text) => (
+                    {["256-bit SSL Secured", "Instant Confirmation", "Free Cancellation 24h"].map((text) => (
                         <div
                             key={text}
                             className="flex flex-col items-center gap-2 bg-slate-50 rounded-xl p-4 text-center"
                         >
                             <ShieldCheck size={18} className="text-primary" />
-                            <span className="text-[10px] font-bold text-slate-500 leading-tight">
-                                {text}
-                            </span>
+                            <span className="text-[10px] font-bold text-slate-500 leading-tight">{text}</span>
                         </div>
                     ))}
                 </div>
@@ -275,9 +236,7 @@ export default function ConfirmationStep({
 
                 <p className="text-center text-[10px] text-slate-400 font-medium leading-relaxed">
                     By confirming, you agree to our{" "}
-                    <a href="#" className="underline">
-                        Cancellation Policy
-                    </a>{" "}
+                    <a href="#" className="underline">Cancellation Policy</a>{" "}
                     and elite clinical standards.
                 </p>
             </div>

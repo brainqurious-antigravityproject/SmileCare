@@ -19,13 +19,9 @@ import {
     Slot,
 } from "@/lib/booking.api";
 import { useToast } from "@/context/ToastContext";
+import type { PatientDetails } from "@/components/booking/PatientDetailsStep";
 
-export interface PatientDetails {
-    name: string;
-    phone: string;
-    email: string;
-    notes: string;
-}
+
 
 // ── State Shape ────────────────────────────────────────────────────────────
 

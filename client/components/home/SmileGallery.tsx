@@ -24,7 +24,7 @@ const SmileGallery = () => {
     };
 
     return (
-        <section className="py-24 bg-navy-deep text-white overflow-hidden">
+        <section id="gallery" className="py-24 bg-navy-deep text-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 flex flex-col md:flex-row justify-between items-end gap-6">
                 <div className="max-w-2xl">
                     <span className="text-accent-gold font-bold tracking-widest uppercase text-sm block mb-4">Patient Transformation</span>

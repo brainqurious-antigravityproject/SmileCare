@@ -10,7 +10,13 @@ import {
     Info,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import type { PatientDetails } from "@/context/BookingContext";
+
+export interface PatientDetails {
+    name: string;
+    phone: string;
+    email: string;
+    notes: string;
+}
 
 interface PatientDetailsStepProps {
     onSubmit: (details: PatientDetails) => void;
@@ -24,28 +30,28 @@ export default function PatientDetailsStep({
     const { user } = useAuth();
 
     const [form, setForm] = useState<PatientDetails>({
-        name: initial?.name ?? user?.name ?? "",
-        phone: initial?.phone ?? user?.phone ?? "",
-        email: initial?.email ?? user?.email ?? "",
+        name: initial?.name ?? "",
+        phone: initial?.phone ?? "",
+        email: initial?.email ?? "",
         notes: initial?.notes ?? "",
     });
 
-    const [errors, setErrors] = useState<Partial<PatientDetails>>({});
+    const [errors, setErrors] = useState<
+        Partial<Record<keyof PatientDetails, string>>
+    >({});
 
-    // Re-sync if auth loads after mount
     useEffect(() => {
-        if (!initial && user) {
-            setForm((prev) => ({
-                ...prev,
-                name: prev.name || user.name || "",
-                phone: prev.phone || user.phone || "",
-                email: prev.email || user.email || "",
-            }));
-        }
-    }, [user, initial]);
+        if (!user) return;
+        setForm((prev) => ({
+            ...prev,
+            name: prev.name || user.name || "",
+            phone: prev.phone || user.phone || "",
+            email: prev.email || user.email || "",
+        }));
+    }, [user]);
 
     const validate = (): boolean => {
-        const errs: Partial<PatientDetails> = {};
+        const errs: Partial<Record<keyof PatientDetails, string>> = {};
         if (!form.name.trim())
             errs.name = "Full name is required";
         if (!form.phone.trim())
@@ -65,42 +71,14 @@ export default function PatientDetailsStep({
         if (validate()) onSubmit(form);
     };
 
-    const inputBase =
-        "w-full px-4 py-3.5 rounded-xl border bg-white text-slate-900 font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all text-sm";
-
-    const Field = ({
-        label,
-        icon: Icon,
-        children,
-        error,
-        hint,
-    }: {
-        label: string;
-        icon: React.ElementType;
-        children: React.ReactNode;
-        error?: string;
-        hint?: string;
-    }) => (
-        <div className="space-y-2">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <Icon size={13} className="text-primary" />
-                {label}
-            </label>
-            {children}
-            {error && (
-                <p className="text-xs text-red-500 font-medium flex items-center gap-1">
-                    <Info size={12} /> {error}
-                </p>
-            )}
-            {hint && !error && (
-                <p className="text-xs text-slate-400">{hint}</p>
-            )}
-        </div>
-    );
+    const base =
+        "w-full px-4 py-3.5 rounded-xl border bg-white text-slate-900 " +
+        "font-medium placeholder:text-slate-300 focus:outline-none " +
+        "focus:ring-2 focus:ring-primary/20 focus:border-primary/30 " +
+        "transition-all text-sm";
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Section header */}
             <div className="mb-10">
                 <p className="text-xs font-bold uppercase tracking-[0.25em] text-primary mb-2">
                     Step 4 of 5
@@ -117,97 +95,111 @@ export default function PatientDetailsStep({
             <form onSubmit={handleSubmit} noValidate>
                 <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-8 space-y-6">
 
-                    {/* Name + Phone */}
                     <div className="grid sm:grid-cols-2 gap-6">
-                        <Field
-                            label="Full Name"
-                            icon={User}
-                            error={errors.name}
-                        >
+                        {/* Full Name */}
+                        <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <User size={13} className="text-primary" />
+                                Full Name
+                            </label>
                             <input
                                 type="text"
                                 value={form.name}
                                 onChange={(e) =>
-                                    setForm({ ...form, name: e.target.value })
+                                    setForm((p) => ({ ...p, name: e.target.value }))
                                 }
                                 placeholder="Your full name"
-                                className={`${inputBase} ${errors.name
-                                        ? "border-red-300 focus:ring-red-200"
-                                        : "border-slate-200"
-                                    }`}
+                                autoComplete="name"
+                                className={`${base} ${errors.name ? "border-red-300" : "border-slate-200"}`}
                             />
-                        </Field>
+                            {errors.name && (
+                                <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                                    <Info size={12} /> {errors.name}
+                                </p>
+                            )}
+                        </div>
 
-                        <Field
-                            label="Phone Number"
-                            icon={Phone}
-                            error={errors.phone}
-                            hint="We'll send appointment reminders here"
-                        >
+                        {/* Phone */}
+                        <div className="space-y-2">
+                            <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <Phone size={13} className="text-primary" />
+                                Phone Number
+                            </label>
                             <input
                                 type="tel"
                                 value={form.phone}
                                 onChange={(e) =>
-                                    setForm({ ...form, phone: e.target.value })
+                                    setForm((p) => ({ ...p, phone: e.target.value }))
                                 }
                                 placeholder="+91 98765 43210"
-                                className={`${inputBase} ${errors.phone
-                                        ? "border-red-300 focus:ring-red-200"
-                                        : "border-slate-200"
-                                    }`}
+                                autoComplete="tel"
+                                className={`${base} ${errors.phone ? "border-red-300" : "border-slate-200"}`}
                             />
-                        </Field>
+                            {errors.phone && (
+                                <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                                    <Info size={12} /> {errors.phone}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {/* Email */}
-                    <Field
-                        label="Email Address"
-                        icon={Mail}
-                        error={errors.email}
-                        hint="Booking confirmation will be sent here"
-                    >
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <Mail size={13} className="text-primary" />
+                            Email Address
+                        </label>
                         <input
                             type="email"
                             value={form.email}
                             onChange={(e) =>
-                                setForm({ ...form, email: e.target.value })
+                                setForm((p) => ({ ...p, email: e.target.value }))
                             }
                             placeholder="you@example.com"
-                            className={`${inputBase} ${errors.email
-                                    ? "border-red-300 focus:ring-red-200"
-                                    : "border-slate-200"
-                                }`}
+                            autoComplete="email"
+                            className={`${base} ${errors.email ? "border-red-300" : "border-slate-200"}`}
                         />
-                    </Field>
+                        {errors.email && (
+                            <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                                <Info size={12} /> {errors.email}
+                            </p>
+                        )}
+                        {!errors.email && (
+                            <p className="text-xs text-slate-400">
+                                Booking confirmation will be sent here
+                            </p>
+                        )}
+                    </div>
 
                     {/* Notes */}
-                    <Field
-                        label="Special Notes (Optional)"
-                        icon={MessageSquare}
-                        hint="Allergies, anxiety, accessibility needs, or anything else we should know"
-                    >
+                    <div className="space-y-2">
+                        <label className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <MessageSquare size={13} className="text-primary" />
+                            Special Notes{" "}
+                            <span className="text-slate-300 normal-case tracking-normal font-medium">
+                                (Optional)
+                            </span>
+                        </label>
                         <textarea
                             value={form.notes}
                             onChange={(e) =>
-                                setForm({ ...form, notes: e.target.value })
+                                setForm((p) => ({ ...p, notes: e.target.value }))
                             }
-                            placeholder="Any medical notes or special requests..."
+                            placeholder="Allergies, anxiety, accessibility needs..."
                             rows={4}
-                            className={`${inputBase} resize-none border-slate-200`}
+                            className={`${base} resize-none border-slate-200`}
                         />
-                    </Field>
+                    </div>
                 </div>
 
-                {/* Privacy note */}
-                <div className="flex items-start gap-3 mt-6 px-1">
+                <div className="flex items-start gap-3 mt-5 px-1">
                     <Info size={14} className="text-slate-400 mt-0.5 shrink-0" />
                     <p className="text-xs text-slate-400 leading-relaxed">
-                        Your information is encrypted and used only to prepare for
-                        your appointment. We never share your data with third parties.
+                        Your information is encrypted and used only to prepare
+                        for your appointment. We never share your data.
                     </p>
                 </div>
 
-                {/* Submit */}
                 <div className="mt-8 flex justify-end">
                     <button
                         type="submit"
