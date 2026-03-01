@@ -2,12 +2,47 @@ import Image from "next/image";
 import Link from "next/link";
 import { BLOG_ARTICLES } from "@/lib/blog-data";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+async function getBlogArticles() {
+    try {
+        const res = await fetch(
+            `${API}/api/cms/content?type=blog`,
+            { next: { revalidate: 300 } }
+        );
+        if (!res.ok) return null;
+        const { items } = await res.json();
+        if (!items || items.length === 0) return null;
+
+        return items.map((item: any) => ({
+            slug: item.slug,
+            title: item.title,
+            excerpt: item.body?.excerpt || item.title,
+            image: item.body?.image || "",
+            category: item.body?.category || "Dental Health",
+            date: new Date(item.createdAt).toLocaleDateString("en-US", {
+                year: "numeric", month: "long", day: "numeric"
+            }),
+            readTime: item.body?.readTime || "5 min read",
+            content: item.body?.content || "",
+        }));
+    } catch {
+        return null;
+    }
+}
+
 export const metadata = {
     title: "Blog | SmileCare Dental",
     description: "Dental health tips, technology insights, and expert advice from the SmileCare team.",
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+    const apiArticles = await getBlogArticles();
+
+    const articles = apiArticles && apiArticles.length > 0
+        ? apiArticles
+        : BLOG_ARTICLES;
+
     return (
         <main className="min-h-screen bg-background-light pt-28 pb-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +62,7 @@ export default function BlogPage() {
 
                 {/* Article Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    {BLOG_ARTICLES.map((article) => (
+                    {articles.map((article: any) => (
                         <article
                             key={article.slug}
                             className="group bg-white rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col"

@@ -22,11 +22,43 @@ const faqs = [
 export default function ContactPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(0);
     const [formSubmitted, setFormSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        subject: "General Inquiry",
+        message: "",
+    });
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setFormSubmitted(true);
-        setTimeout(() => setFormSubmitted(false), 3000);
+        if (!form.message.trim() || !form.email.trim()) return;
+
+        setSubmitting(true);
+        setError("");
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/support/contact`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(form),
+                }
+            ).catch(() => null);
+
+            if (res?.ok) {
+                setFormSubmitted(true);
+                setForm({ name: "", email: "", subject: "General Inquiry", message: "" });
+                setTimeout(() => setFormSubmitted(false), 5000);
+            } else {
+                setError("Something went wrong. Please try again or call us directly.");
+            }
+        } catch {
+            setError("Connection error. Please try again.");
+        }
+        setSubmitting(false);
     };
 
     return (
@@ -74,6 +106,8 @@ export default function ContactPage() {
                                             type="text"
                                             placeholder="John Doe"
                                             required
+                                            value={form.name}
+                                            onChange={(e) => setForm({ ...form, name: e.target.value })}
                                             className="w-full h-12 px-4 rounded-lg border border-primary/20 bg-background-light focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                         />
                                     </div>
@@ -83,6 +117,8 @@ export default function ContactPage() {
                                             type="email"
                                             placeholder="john@example.com"
                                             required
+                                            value={form.email}
+                                            onChange={(e) => setForm({ ...form, email: e.target.value })}
                                             className="w-full h-12 px-4 rounded-lg border border-primary/20 bg-background-light focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                                         />
                                     </div>
@@ -90,7 +126,11 @@ export default function ContactPage() {
 
                                 <div className="space-y-2">
                                     <label className="text-sm font-semibold text-primary/70 px-1">Subject</label>
-                                    <select className="w-full h-12 px-4 rounded-lg border border-primary/20 bg-background-light focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none">
+                                    <select
+                                        value={form.subject}
+                                        onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                                        className="w-full h-12 px-4 rounded-lg border border-primary/20 bg-background-light focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                                    >
                                         <option>General Inquiry</option>
                                         <option>Booking Request</option>
                                         <option>Insurance Question</option>
@@ -104,15 +144,21 @@ export default function ContactPage() {
                                         placeholder="How can we help you today?"
                                         rows={5}
                                         required
+                                        value={form.message}
+                                        onChange={(e) => setForm({ ...form, message: e.target.value })}
                                         className="w-full p-4 rounded-lg border border-primary/20 bg-background-light focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none"
                                     />
                                 </div>
 
+                                {error && (
+                                    <p className="text-red-500 text-sm">{error}</p>
+                                )}
                                 <button
                                     type="submit"
-                                    className="w-full bg-primary text-white h-14 rounded-xl font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+                                    disabled={submitting || !form.message.trim() || !form.email.trim()}
+                                    className="w-full bg-primary text-white h-14 rounded-xl font-bold text-lg hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
                                 >
-                                    Send Message
+                                    {submitting ? "Sending..." : "Send Message"}
                                 </button>
                             </form>
                         )}

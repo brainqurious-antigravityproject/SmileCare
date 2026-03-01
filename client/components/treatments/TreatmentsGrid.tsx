@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import TreatmentsSearch from "./TreatmentsSearch";
 import TreatmentsFilterBar from "./TreatmentsFilterBar";
 import TreatmentCard from "./TreatmentCard";
 import type { Treatment } from "./TreatmentCard";
 import { TREATMENTS } from "@/lib/treatments-data";
 
-const treatments: Treatment[] = TREATMENTS.map((t) => ({
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+const STATIC_FALLBACK: Treatment[] = TREATMENTS.map((t) => ({
     id: t.id,
     title: t.title,
     slug: t.slug,
@@ -17,8 +19,30 @@ const treatments: Treatment[] = TREATMENTS.map((t) => ({
 }));
 
 const TreatmentsGrid = () => {
+    const [treatments, setTreatments] = useState<Treatment[]>(STATIC_FALLBACK);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeCategory, setActiveCategory] = useState("All");
+
+    useEffect(() => {
+        fetch(`${API}/api/treatments`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data: any[] | null) => {
+                if (data && data.length > 0) {
+                    const mapped: Treatment[] = data.map((t) => ({
+                        id: t.id,
+                        title: t.name,
+                        slug: t.slug,
+                        category: t.category?.name || "General",
+                        description: t.description || "",
+                        image: t.imageUrl || "",
+                    }));
+                    setTreatments(mapped);
+                }
+            })
+            .catch(() => { /* keep static fallback */ })
+            .finally(() => setLoading(false));
+    }, []);
 
     const filteredTreatments = useMemo(() => {
         return treatments.filter((treatment) => {
@@ -30,10 +54,15 @@ const TreatmentsGrid = () => {
                 treatment.description.toLowerCase().includes(searchQuery.toLowerCase());
             return matchesCategory && matchesSearch;
         });
-    }, [searchQuery, activeCategory]);
+    }, [treatments, searchQuery, activeCategory]);
 
     return (
         <div className="flex flex-col">
+            {loading && (
+                <p className="text-xs text-primary/30 mb-4 animate-pulse">
+                    Loading treatments...
+                </p>
+            )}
             <div className="flex flex-col lg:flex-row lg:items-center gap-6 mb-12">
                 <div className="w-full lg:flex-1">
                     <TreatmentsSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} />

@@ -274,8 +274,8 @@ export default function PaymentPage() {
             }
         } catch (err: any) {
             warning(
-                "Payment Verified Offline",
-                "Payment server unavailable. Your booking has been saved locally."
+                "Note",
+                "Booking saved locally — server sync pending."
             );
 
             // Still allow success UI for demo — save mock booking

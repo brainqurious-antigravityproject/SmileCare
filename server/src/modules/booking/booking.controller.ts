@@ -207,3 +207,65 @@ export async function cancelBooking(req: AuthRequest, res: Response) {
         );
     }
 }
+
+// ─── GET /api/bookings/my ────────────────────────────────────────────────────
+
+export async function getMyBookings(req: AuthRequest, res: Response) {
+    try {
+        const patient = await prisma.patient.findUnique({
+            where: { userId: req.user!.id },
+        });
+
+        if (!patient) {
+            return res.status(404).json(
+                errorResponse('NOT_FOUND', 'Patient record not found')
+            );
+        }
+
+        const { status } = req.query;
+
+        const where: any = { patientId: patient.id };
+        if (status) {
+            where.status = status;
+        }
+
+        const bookings = await prisma.booking.findMany({
+            where,
+            include: {
+                slot: {
+                    include: {
+                        dentist: {
+                            include: { user: true }
+                        }
+                    }
+                },
+                treatment: true,
+                payment: true
+            },
+            orderBy: {
+                slot: { startTime: 'desc' }
+            }
+        });
+
+        // Map to standard frontend format
+        const formatted = bookings.map(b => ({
+            id: b.id,
+            treatment: b.treatment.name,
+            doctor: `Dr. ${b.slot.dentist.user.name}`,
+            specialization: b.slot.dentist.specialization,
+            date: b.slot.date.toISOString(),
+            startTime: b.slot.startTime,
+            endTime: b.slot.endTime,
+            status: b.status,
+            paymentAmount: b.payment?.amount || null,
+            paymentStatus: b.payment?.status || null
+        }));
+
+        return res.status(200).json(formatted);
+    } catch (error) {
+        console.error('[GET_MY_BOOKINGS_ERROR]', error);
+        return res.status(500).json(
+            errorResponse('INTERNAL_ERROR', 'Failed to fetch bookings')
+        );
+    }
+}

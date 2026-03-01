@@ -4,7 +4,35 @@ import { notFound } from "next/navigation";
 import { BLOG_ARTICLES } from "@/lib/blog-data";
 
 interface Props {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+async function getArticle(slug: string) {
+    try {
+        const res = await fetch(
+            `${API}/api/cms/content/${slug}`,
+            { next: { revalidate: 300 } }
+        );
+        if (res.ok) {
+            const item = await res.json();
+            return {
+                slug: item.slug,
+                title: item.title,
+                excerpt: item.body?.excerpt || "",
+                image: item.body?.image || "",
+                category: item.body?.category || "Dental Health",
+                date: new Date(item.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric", month: "long", day: "numeric"
+                }),
+                readTime: item.body?.readTime || "5 min read",
+                content: item.body?.content || "<p>Article content coming soon.</p>",
+            };
+        }
+    } catch { /* fall through */ }
+
+    return BLOG_ARTICLES.find((a) => a.slug === slug) || null;
 }
 
 export async function generateStaticParams() {
@@ -12,7 +40,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: Props) {
-    const article = BLOG_ARTICLES.find((a) => a.slug === params.slug);
+    const { slug } = await params;
+    const article = await getArticle(slug);
     if (!article) return {};
     return {
         title: `${article.title} | SmileCare Blog`,
@@ -20,11 +49,12 @@ export async function generateMetadata({ params }: Props) {
     };
 }
 
-export default function BlogArticlePage({ params }: Props) {
-    const article = BLOG_ARTICLES.find((a) => a.slug === params.slug);
+export default async function BlogArticlePage({ params }: Props) {
+    const { slug } = await params;
+    const article = await getArticle(slug);
     if (!article) notFound();
 
-    const others = BLOG_ARTICLES.filter((a) => a.slug !== params.slug);
+    const others = BLOG_ARTICLES.filter((a) => a.slug !== slug);
 
     return (
         <main className="min-h-screen bg-background-light pt-28 pb-24">

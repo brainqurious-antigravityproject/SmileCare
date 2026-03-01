@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import {
     getLocalUpcomingBookings,
+    getLocalHistoryBookings,
     updateLocalBookingStatus,
     type LocalBooking,
 } from "@/lib/booking-storage";
@@ -33,8 +34,8 @@ function formatDate(d: string) {
 }
 
 export default function AppointmentsPage() {
-    const [appointments, setAppointments] = useState<LocalBooking[]>(
-        () => (typeof window !== "undefined" ? getLocalUpcomingBookings() : [])
+    const [appointments, setAppointments] = useState<any[]>(
+        () => (typeof window !== "undefined" ? [...getLocalUpcomingBookings(), ...getLocalHistoryBookings()] : [])
     );
     const [loading, setLoading] = useState(true);
 
@@ -48,24 +49,30 @@ export default function AppointmentsPage() {
 
     useEffect(() => {
         const load = async () => {
+            const localUp = getLocalUpcomingBookings();
+            const localHist = getLocalHistoryBookings();
+
             try {
-                const res = await fetch(
-                    `${API}/api/patient/appointments/upcoming`,
-                    { credentials: "include" }
-                ).catch(() => null);
+                const [uRes, hRes] = await Promise.all([
+                    fetch(`${API}/api/patient/appointments/upcoming`, { credentials: "include" }).catch(() => null),
+                    fetch(`${API}/api/patient/appointments/history`, { credentials: "include" }).catch(() => null),
+                ]);
 
-                const localUpcoming = getLocalUpcomingBookings();
+                const serverUp = uRes?.ok ? await uRes.json() : [];
+                const serverHist = hRes?.ok ? await hRes.json() : [];
 
-                if (res?.ok) {
-                    const serverData = await res.json();
-                    setAppointments(
-                        serverData.length > 0 ? serverData : localUpcoming
-                    );
-                } else {
-                    setAppointments(localUpcoming);
-                }
+                const mergedUp = [
+                    ...serverUp,
+                    ...localUp.filter((l: any) => !serverUp.some((s: any) => s.id === l.id)),
+                ];
+                const mergedHist = [
+                    ...serverHist,
+                    ...localHist.filter((l: any) => !serverHist.some((s: any) => s.id === l.id)),
+                ];
+
+                setAppointments([...mergedUp, ...mergedHist]);
             } catch {
-                setAppointments(getLocalUpcomingBookings());
+                setAppointments([...localUp, ...localHist]);
             }
             setLoading(false);
         };
@@ -99,7 +106,7 @@ export default function AppointmentsPage() {
         <>
             <header className="sticky top-0 z-40 bg-background-light/80 backdrop-blur-md border-b border-primary/5 px-8 py-6">
                 <h2 className="font-display text-3xl font-black text-primary tracking-tight flex items-center gap-3">
-                    <CalendarDays size={28} /> Upcoming Appointments
+                    <CalendarDays size={28} /> Appointments
                 </h2>
                 <p className="text-primary/50 mt-1">
                     {appointments.length} scheduled
@@ -114,7 +121,7 @@ export default function AppointmentsPage() {
             ) : appointments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-96 text-primary/40">
                     <CalendarDays size={64} className="mb-4" />
-                    <p className="text-lg font-bold">No upcoming appointments</p>
+                    <p className="text-lg font-bold">No appointments found</p>
                     <p className="text-sm">Book a new appointment to get started.</p>
                     <Link
                         href="/booking"

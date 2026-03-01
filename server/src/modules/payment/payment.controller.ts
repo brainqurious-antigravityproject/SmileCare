@@ -1,6 +1,6 @@
 // ─── Payment Controller — Request Handling Layer ─────────────────────────────
 
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthRequest } from '../../middleware/authMiddleware';
 import * as paymentService from './payment.service';
 import { PaymentError } from './payment.types';
@@ -59,86 +59,112 @@ export async function createOrder(req: AuthRequest, res: Response) {
 
 // ─── POST /api/payments/verify ───────────────────────────────────────────────
 
-export async function verifyPayment(req: AuthRequest, res: Response) {
+export const verifyPayment = async (req: Request, res: Response) => {
     try {
-        const { orderId, slotId, treatmentId, sessionId, idempotencyKey } =
-            req.body;
+        const {
+            orderId,
+            slotId,
+            treatmentId,
+            sessionId,
+            idempotencyKey,
+            amount,
+        } = req.body;
 
-        if (
-            !orderId ||
-            !slotId ||
-            !treatmentId ||
-            !sessionId ||
-            !idempotencyKey
-        ) {
-            return res.status(400).json(
-                errorResponse(
-                    'VALIDATION_ERROR',
-                    'orderId, slotId, treatmentId, sessionId, and idempotencyKey are required'
-                )
-            );
+        const userId = (req as any).user?.id;
+        if (!userId) {
+            return res.status(401).json({ success: false,
+                error: { message: 'Unauthorized' } });
         }
 
-        // Look up patient from authenticated user
+        // Find patient record
         const patient = await prisma.patient.findUnique({
-            where: { userId: req.user!.id },
+            where: { userId },
+        });
+        if (!patient) {
+            return res.status(404).json({ success: false,
+                error: { message: 'Patient not found' } });
+        }
+
+        // Idempotency — return existing booking if already processed
+        if (idempotencyKey) {
+            const existing = await prisma.booking.findUnique({
+                where: { idempotencyKey },
+                include: { payment: true },
+            });
+            if (existing) {
+                return res.json({
+                    success: true,
+                    data: {
+                        payment: { id: existing.payment?.id || existing.paymentId },
+                        booking: { id: existing.id, status: existing.status },
+                    },
+                });
+            }
+        }
+
+        // Find the slot
+        const slot = await prisma.slot.findUnique({ where: { id: slotId } });
+        if (!slot) {
+            return res.status(404).json({ success: false,
+                error: { message: 'Slot not found or expired' } });
+        }
+
+        // Find dentist for the slot
+        const dentistId = slot.dentistId;
+
+        // Create booking + payment in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Create booking
+            const booking = await tx.booking.create({
+                data: {
+                    patientId: patient.id,
+                    dentistId,
+                    treatmentId,
+                    slotId,
+                    status: 'confirmed',
+                    idempotencyKey: idempotencyKey || orderId || undefined,
+                    notes: '',
+                },
+            });
+
+            // Create payment
+            const payment = await tx.payment.create({
+                data: {
+                    bookingId: booking.id,
+                    amount: amount || 0,
+                    status: 'captured',
+                    razorpayOrderId: orderId || null,
+                },
+            });
+
+            // Mark slot as unavailable
+            await tx.slot.update({
+                where: { id: slotId },
+                data: { isAvailable: false, heldBySessionId: null, holdExpiresAt: null },
+            });
+
+            // Update booking with paymentId
+            await tx.booking.update({
+                where: { id: booking.id },
+                data: { paymentId: payment.id },
+            });
+
+            return { booking, payment };
         });
 
-        if (!patient) {
-            return res.status(403).json(
-                errorResponse('NOT_A_PATIENT', 'Only patients can verify payments')
-            );
-        }
-
-        const result = await paymentService.verifyMockPayment(
-            { orderId, slotId, treatmentId, sessionId, idempotencyKey },
-            patient.id
-        );
-
-        const status = result.isIdempotent ? 200 : 201;
-        return res.status(status).json(
-            successResponse({
-                booking: result.booking,
-                payment: {
-                    id: result.payment.id,
-                    orderId: result.payment.razorpayOrderId,
-                    amount: result.payment.amount,
-                    status: result.payment.status,
-                },
-            })
-        );
-    } catch (error) {
-        if (error instanceof PaymentError) {
-            const statusMap: Record<string, number> = {
-                ORDER_NOT_FOUND: 404,
-                ORDER_MISMATCH: 400,
-                ORDER_EXPIRED: 410,
-            };
-            const status = statusMap[error.code] || 400;
-            return res.status(status).json(errorResponse(error.code, error.message));
-        }
-
-        // BookingError may bubble up from createBooking
-        const { BookingError } = require('../booking/booking.service');
-        if (error instanceof BookingError) {
-            const statusMap: Record<string, number> = {
-                SLOT_NOT_FOUND: 404,
-                SLOT_UNAVAILABLE: 409,
-                HOLD_MISMATCH: 409,
-                HOLD_EXPIRED: 410,
-            };
-            const status = statusMap[(error as any).code] || 400;
-            return res
-                .status(status)
-                .json(errorResponse((error as any).code, (error as any).message));
-        }
-
-        console.error('[VERIFY_PAYMENT_ERROR]', error);
-        return res.status(500).json(
-            errorResponse('INTERNAL_ERROR', 'Failed to verify payment')
-        );
+        return res.status(200).json({
+            success: true,
+            data: {
+                payment: { id: result.payment.id, status: result.payment.status },
+                booking: { id: result.booking.id, status: result.booking.status },
+            },
+        });
+    } catch (err: any) {
+        console.error('verifyPayment error:', err);
+        return res.status(500).json({ success: false,
+            error: { message: err.message || 'Internal server error' } });
     }
-}
+};
 
 // ─── POST /api/payments/refund ───────────────────────────────────────────────
 

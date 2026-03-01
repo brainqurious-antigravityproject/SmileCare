@@ -157,6 +157,62 @@ async function main() {
         }
     }
     console.log(`✅ ${slotCount} slots seeded`);
+
+    // ── Seed Blog Articles ──────────────────────────────────
+    const blogArticles = [
+        {
+            title: "5 Signs You Need to See a Dentist Today",
+            slug: "5-signs-you-need-dentist",
+            type: "blog" as const,
+            status: "published" as const,
+            featured: true,
+            body: {
+                excerpt: "Ignoring dental symptoms can lead to costly treatments. Here are the top warning signs you shouldn't ignore.",
+                category: "Oral Health",
+                readTime: "4 min read",
+                image: "",
+                content: "<h2>Don't Wait Until It Hurts</h2><p>Many dental issues start silently. By the time you feel pain, the problem may have advanced significantly...</p>",
+            },
+        },
+        {
+            title: "Invisalign vs Braces: Which Is Right for You?",
+            slug: "invisalign-vs-braces",
+            type: "blog" as const,
+            status: "published" as const,
+            featured: false,
+            body: {
+                excerpt: "Both treatments straighten teeth effectively, but the right choice depends on your lifestyle and clinical needs.",
+                category: "Orthodontics",
+                readTime: "6 min read",
+                image: "",
+                content: "<h2>Clear Aligners vs Traditional Braces</h2><p>Invisalign offers greater comfort and aesthetics for most cases, while traditional braces handle complex corrections better...</p>",
+            },
+        },
+        {
+            title: "The Complete Guide to Dental Implants",
+            slug: "complete-guide-dental-implants",
+            type: "blog" as const,
+            status: "published" as const,
+            featured: false,
+            body: {
+                excerpt: "Dental implants are the gold standard for replacing missing teeth. Here's everything you need to know.",
+                category: "Implantology",
+                readTime: "8 min read",
+                image: "",
+                content: "<h2>What Are Dental Implants?</h2><p>A dental implant is a titanium post that serves as a synthetic tooth root, providing a permanent foundation for replacement teeth...</p>",
+            },
+        },
+    ];
+
+    for (const article of blogArticles) {
+        await prisma.content.upsert({
+            where: { slug: article.slug },
+            update: {},
+            create: article,
+        });
+    }
+    console.log("✅ Seeded", blogArticles.length, "blog articles");
+
     console.log('🎉 Database seeded successfully!');
 }
 

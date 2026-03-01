@@ -26,40 +26,36 @@ function formatCurrency(amt: number | null) {
 
 export default function HistoryPage() {
     const [history, setHistory] = useState<any[]>(
-        () => {
-            if (typeof window === "undefined") return mockHistory;
-            const local = getLocalBookings(); // all bookings as history fallback
-            return local.length > 0 ? local : mockHistory;
-        }
+        () => (typeof window !== "undefined"
+            ? getLocalHistoryBookings()
+            : [])
     );
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const load = async () => {
+            const localHist = getLocalHistoryBookings();
+            // Show local immediately while server loads
+            if (localHist.length > 0) setHistory(localHist);
+
             try {
                 const res = await fetch(
                     `${API}/api/patient/appointments/history`,
                     { credentials: "include" }
                 ).catch(() => null);
 
-                const localHistory = getLocalBookings(); // show all local as fallback
-
                 if (res?.ok) {
-                    const serverData = await res.json();
-                    if (serverData.length > 0) {
-                        setHistory(serverData);
-                    } else if (localHistory.length > 0) {
-                        setHistory(localHistory);
-                    } else {
-                        setHistory(mockHistory);
-                    }
-                } else {
-                    // Show all local bookings as history when server is unavailable
-                    // Only fall back to mock if user has genuinely never booked
-                    const allLocal = getLocalBookings();
-                    setHistory(allLocal.length > 0 ? allLocal : mockHistory);
+                    const serverHist = await res.json();
+                    const merged = [
+                        ...serverHist,
+                        ...localHist.filter(
+                            (l: any) =>
+                                !serverHist.some((s: any) => s.id === l.id)
+                        ),
+                    ];
+                    setHistory(merged);
                 }
-            } catch { /* mock fallback */ }
+            } catch { /* keep local data */ }
             setLoading(false);
         };
         load();

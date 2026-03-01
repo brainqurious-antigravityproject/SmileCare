@@ -59,7 +59,9 @@ const timeline = [
     },
 ];
 
-const specialists = [
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+const STATIC_SPECIALISTS = [
     {
         name: "Dr. Alistair Vance",
         role: "Chief Dental Surgeon",
@@ -82,7 +84,28 @@ const specialists = [
     },
 ];
 
-export default function AboutPage() {
+async function getSpecialists() {
+    try {
+        const res = await fetch(`${API}/api/dentists`,
+            { next: { revalidate: 600 } }
+        );
+        if (!res.ok) return STATIC_SPECIALISTS;
+        const data = await res.json();
+        if (!data || data.length === 0) return STATIC_SPECIALISTS;
+        return data.map((d: any) => ({
+            name: d.name?.startsWith("Dr.")
+                ? d.name
+                : `Dr. ${d.name}`,
+            role: d.specialty || d.specialization || "Dental Specialist",
+            image: d.photoUrl || d.image || "",
+        }));
+    } catch {
+        return STATIC_SPECIALISTS;
+    }
+}
+
+export default async function AboutPage() {
+    const specialists = await getSpecialists();
     return (
         <main className="bg-background-light">
 
@@ -194,7 +217,7 @@ export default function AboutPage() {
                     </Link>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {specialists.map((doctor) => (
+                    {specialists.map((doctor: any) => (
                         <div key={doctor.name} className="group">
                             <div className="aspect-[4/5] rounded-2xl overflow-hidden mb-4 relative">
                                 <Image

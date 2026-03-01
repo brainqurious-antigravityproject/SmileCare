@@ -8,6 +8,7 @@ import {
     createBooking,
     rescheduleBooking,
     cancelBooking,
+    getMyBookings,
 } from './booking.controller';
 
 const router = Router();
@@ -30,5 +31,8 @@ router.put('/bookings/:id/reschedule', authenticate, rescheduleBooking);
 
 // Cancel a booking (requires JWT)
 router.delete('/bookings/:id/cancel', authenticate, cancelBooking);
+
+// Get my bookings (convenience filtered route)
+router.get('/bookings/my', authenticate, getMyBookings);
 
 export default router;

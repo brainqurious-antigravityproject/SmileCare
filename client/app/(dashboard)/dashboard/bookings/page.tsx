@@ -20,6 +20,7 @@ import {
     type LocalBooking,
 } from "@/lib/booking-storage";
 import { BookingCardSkeleton } from "@/components/ui/Skeleton";
+import { useToast } from "@/context/ToastContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -28,6 +29,7 @@ type Tab = "upcoming" | "history";
 type AnyBooking = {
     id: string;
     treatment: string;
+    treatmentId?: string;
     doctor: string;
     specialization?: string;
     date: string;
@@ -122,12 +124,19 @@ function BookingCard({ booking, onCancel }: {
                     >
                         <XCircle size={15} /> Cancel
                     </button>
-                    <Link
-                        href="/booking"
+                    <button
+                        type="button"
+                        onClick={() => {
+                            sessionStorage.setItem(
+                                "smilecare_reschedule",
+                                JSON.stringify({ treatmentId: booking.treatmentId || "" })
+                            );
+                            window.location.href = "/booking";
+                        }}
                         className="flex items-center gap-2 text-primary bg-primary/5 px-4 py-2 rounded-xl text-sm font-bold hover:bg-primary/10 transition-colors"
                     >
                         <RefreshCw size={15} /> Reschedule
-                    </Link>
+                    </button>
                 </div>
             )}
 
@@ -160,6 +169,7 @@ function BookingCard({ booking, onCancel }: {
 }
 
 export default function BookingsPage() {
+    const { success: toastSuccess } = useToast();
     const [tab, setTab] = useState<Tab>("upcoming");
     // Initialize synchronously from localStorage to avoid empty flash
     const [upcoming, setUpcoming] = useState<AnyBooking[]>(
@@ -192,9 +202,20 @@ export default function BookingsPage() {
                 const serverUp = uRes?.ok ? await uRes.json() : [];
                 const serverHist = hRes?.ok ? await hRes.json() : [];
 
-                // Merge: server data preferred, local fills gaps
-                setUpcoming(serverUp.length > 0 ? serverUp : localUp);
-                setHistory(serverHist.length > 0 ? serverHist : localHist);
+                const mergedUp = [
+                    ...serverUp,
+                    ...localUp.filter(
+                        (l: AnyBooking) => !serverUp.some((s: AnyBooking) => s.id === l.id)
+                    ),
+                ];
+                const mergedHist = [
+                    ...serverHist,
+                    ...localHist.filter(
+                        (l: AnyBooking) => !serverHist.some((s: AnyBooking) => s.id === l.id)
+                    ),
+                ];
+                setUpcoming(mergedUp);
+                setHistory(mergedHist);
             } catch {
                 setUpcoming(localUp);
                 setHistory(localHist);
@@ -215,6 +236,7 @@ export default function BookingsPage() {
         // Persist cancellation in localStorage
         updateLocalBookingStatus(id, "cancelled");
         setUpcoming((prev) => prev.filter((a) => a.id !== id));
+        toastSuccess("Booking Cancelled", "Your appointment has been cancelled.");
     };
 
     const shown = tab === "upcoming" ? upcoming : history;

@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTreatmentBySlug, getAllTreatmentSlugs, TREATMENTS } from "@/lib/treatments-data";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 import TreatmentBreadcrumb from "@/components/treatment-detail/TreatmentBreadcrumb";
 import TreatmentHero from "@/components/treatment-detail/TreatmentHero";
 import TreatmentProcess from "@/components/treatment-detail/TreatmentProcess";
@@ -37,13 +39,31 @@ export default async function TreatmentDetailPage({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    const treatment = getTreatmentBySlug(slug);
+    const staticTreatment = getTreatmentBySlug(slug);
 
-    if (!treatment) notFound();
+    if (!staticTreatment) notFound();
+
+    let apiTreatment: any = null;
+    try {
+        const res = await fetch(`${API}/api/treatments/${slug}`,
+            { next: { revalidate: 300 } }
+        );
+        if (res.ok) apiTreatment = await res.json();
+    } catch { /* use static only */ }
+
+    const treatment = {
+        ...staticTreatment,
+        ...(apiTreatment ? {
+            title: apiTreatment.name || staticTreatment.title,
+            description: apiTreatment.description || staticTreatment.description,
+            startingPrice: apiTreatment.priceRange || staticTreatment.startingPrice,
+            heroImage: apiTreatment.imageUrl || staticTreatment.heroImage,
+        } : {}),
+    };
 
     // Resolve related treatments
     const related = treatment.relatedSlugs
-        .map((s) => TREATMENTS.find((t) => t.slug === s))
+        .map((s: string) => TREATMENTS.find((t) => t.slug === s))
         .filter(Boolean) as typeof TREATMENTS;
 
     return (

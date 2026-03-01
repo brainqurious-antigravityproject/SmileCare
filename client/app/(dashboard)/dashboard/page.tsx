@@ -70,31 +70,21 @@ function formatDate(d: string) {
 export default function DashboardPage() {
     const { user } = useAuth();
     const [profile, setProfile] = useState<any>(mockProfile);
-    const [upcoming, setUpcoming] = useState<any[]>(
-        () => {
-            if (typeof window === "undefined") return mockUpcoming;
-            const local = getLocalUpcomingBookings();
-            return local.length > 0 ? local : mockUpcoming;
-        }
-    );
-    const [history, setHistory] = useState<any[]>(
-        () => {
-            if (typeof window === "undefined") return mockHistory;
-            const local = getLocalBookings().slice(0, 3);
-            return local.length > 0 ? local : mockHistory;
-        }
-    );
+    const [upcoming, setUpcoming] = useState<any[]>([]);
+    const [history, setHistory] = useState<any[]>([]);
     const [docs, setDocs] = useState<any[]>(mockDocs);
     const [loading, setLoading] = useState(true);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
         const load = async () => {
             try {
-                const [pRes, uRes, hRes, dRes] = await Promise.all([
+                const [pRes, uRes, hRes, dRes, nRes] = await Promise.all([
                     fetch(`${API}/api/patient/me`, { credentials: "include" }).catch(() => null),
                     fetch(`${API}/api/patient/appointments/upcoming`, { credentials: "include" }).catch(() => null),
                     fetch(`${API}/api/patient/appointments/history`, { credentials: "include" }).catch(() => null),
                     fetch(`${API}/api/patient/documents`, { credentials: "include" }).catch(() => null),
+                    fetch(`${API}/api/notifications`, { credentials: "include" }).catch(() => null),
                 ]);
 
                 if (pRes?.ok) {
@@ -109,33 +99,27 @@ export default function DashboardPage() {
                     });
                 }
 
-                const localUpcoming = getLocalUpcomingBookings();
+                const serverUp = uRes?.ok ? (await uRes.json()) : [];
+                const serverHist = hRes?.ok ? (await hRes.json()) : [];
+                const localUp = getLocalUpcomingBookings();
+                const localHist = getLocalBookings();
 
-                if (uRes?.ok) {
-                    const serverUpcoming = await uRes.json();
-                    // Merge: server data takes precedence, local fills gaps
-                    if (serverUpcoming.length > 0) {
-                        setUpcoming(serverUpcoming);
-                    } else if (localUpcoming.length > 0) {
-                        setUpcoming(localUpcoming);
-                    }
-                } else {
-                    // API failed or offline — use sessionStorage
-                    if (localUpcoming.length > 0) {
-                        setUpcoming(localUpcoming);
-                    }
-                }
+                const mergedUp = [
+                    ...serverUp,
+                    ...localUp.filter((l: any) => !serverUp.some((s: any) => s.id === l.id)),
+                ];
+                const mergedHist = serverHist.length > 0 ? serverHist : localHist;
 
-                if (hRes?.ok) {
-                    const h = await hRes.json();
-                    setHistory(h.slice(0, 3));
-                } else {
-                    // Show recently confirmed (local) as history fallback
-                    const localAll = getLocalBookings().slice(0, 3);
-                    if (localAll.length > 0) setHistory(localAll);
-                }
+                setUpcoming(mergedUp.length > 0 ? mergedUp : mockUpcoming);
+                setHistory(mergedHist.length > 0 ? mergedHist.slice(0, 3) : mockHistory.slice(0, 3));
 
                 if (dRes?.ok) { const d = await dRes.json(); setDocs(d.slice(0, 3)); }
+
+                if (nRes?.ok) {
+                    const notifs = await nRes.json();
+                    const data = Array.isArray(notifs) ? notifs : (notifs.data || []);
+                    setUnreadCount(data.filter((n: any) => !n.isRead).length);
+                }
             } catch { /* fallback to mock */ }
             setLoading(false);
         };
@@ -163,8 +147,13 @@ export default function DashboardPage() {
                             <span className="text-xs font-bold text-primary">{profile.loyaltyPoints} pts</span>
                             <span className="text-[10px] bg-accent-gold/20 text-accent-gold px-2 py-0.5 rounded-full font-bold uppercase">{profile.membership}</span>
                         </div>
-                        <button className="size-10 flex items-center justify-center rounded-full bg-white border border-primary/10 text-primary/40 hover:text-primary transition-colors">
+                        <button className="size-10 flex items-center justify-center rounded-full bg-white border border-primary/10 text-primary/40 hover:text-primary transition-colors relative">
                             <Bell size={20} />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                                    {unreadCount > 9 ? "9+" : unreadCount}
+                                </span>
+                            )}
                         </button>
                     </div>
                 </div>
