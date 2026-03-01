@@ -201,7 +201,155 @@ export default function PaymentPage() {
 
     // ─── Payment Simulation ──────────────────────────────────────────────────
 
+    const PAYMENT_MODE = process.env.NEXT_PUBLIC_PAYMENT_MODE;
+
     const handlePay = async () => {
+        if (!paymentData || !isFormValid()) return;
+
+        if (PAYMENT_MODE === 'razorpay') {
+            await handleRazorpayPay();
+        } else {
+            await handleMockPay();
+        }
+    };
+
+    const handleRazorpayPay = async () => {
+        if (!paymentData) return;
+        setPageState("processing");
+
+        try {
+            // Load Razorpay SDK dynamically
+            await new Promise<void>((resolve, reject) => {
+                if (typeof (window as any).Razorpay !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+                script.onload = () => resolve();
+                script.onerror = () =>
+                    reject(new Error('Failed to load Razorpay SDK'));
+                document.head.appendChild(script);
+            });
+
+            // Open Razorpay checkout
+            const amountInPaise = Math.round(total * 100);
+
+            await new Promise<void>((resolve, reject) => {
+                const options = {
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                    amount: amountInPaise,
+                    currency: 'INR',
+                    name: 'SmileCare',
+                    description: paymentData.treatment?.title || 'Dental Treatment',
+                    order_id: paymentData.orderId,
+                    prefill: {
+                        name: '', // populate from useAuth() user.name if available
+                        email: '', // populate from useAuth() user.email if available
+                    },
+                    theme: { color: '#1a3a5c' },
+                    handler: async (response: {
+                        razorpay_payment_id: string;
+                        razorpay_order_id: string;
+                        razorpay_signature: string;
+                    }) => {
+                        try {
+                            // Verify on server
+                            const res = await fetch(
+                                `${API}/api/payments/verify`,
+                                {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    credentials: 'include',
+                                    body: JSON.stringify({
+                                        orderId: response.razorpay_order_id,
+                                        slotId: paymentData.slotId,
+                                        treatmentId: paymentData.treatmentId,
+                                        sessionId: paymentData.sessionId,
+                                        idempotencyKey: paymentData.idempotencyKey,
+                                        razorpayPaymentId: response.razorpay_payment_id,
+                                        razorpaySignature: response.razorpay_signature,
+                                    }),
+                                }
+                            );
+
+                            if (res.ok) {
+                                const data = await res.json();
+                                const pid = data.data?.payment?.id ||
+                                    response.razorpay_payment_id;
+                                const bid = data.data?.booking?.id ||
+                                    `book_${Date.now()}`;
+                                setPaymentId(pid);
+                                setBookingId(bid);
+
+                                // Persist booking locally (same as mock)
+                                addLocalBooking({
+                                    id: bid,
+                                    paymentId: pid,
+                                    treatment: paymentData.treatment?.title ||
+                                        'Dental Treatment',
+                                    treatmentId: paymentData.treatment?.id ||
+                                        paymentData.treatmentId,
+                                    doctor: paymentData.specialist?.name ||
+                                        'SmileCare Specialist',
+                                    specialization:
+                                        paymentData.specialist?.specialty || '',
+                                    date: paymentData.date,
+                                    startTime: paymentData.slot?.startTime || 'TBD',
+                                    status: 'confirmed',
+                                    paymentAmount: total,
+                                    paymentStatus: 'captured',
+                                    confirmedAt: new Date().toISOString(),
+                                });
+
+                                sessionStorage.removeItem('smilecare_payment');
+                                success('Payment Successful!',
+                                    'Your appointment has been confirmed.');
+                                setPageState('success');
+                                resolve();
+                            } else {
+                                const errData = await res.json().catch(() => ({}));
+                                toastError(
+                                    'Verification Failed',
+                                    errData?.error?.message || 'Payment could not be verified.'
+                                );
+                                setPageState('form');
+                                reject(new Error('Verification failed'));
+                            }
+                        } catch (err) {
+                            toastError('Error', 'Something went wrong.');
+                            setPageState('form');
+                            reject(err);
+                        }
+                    },
+                    modal: {
+                        ondismiss: () => {
+                            warning('Payment Cancelled',
+                                'You closed the payment window.');
+                            setPageState('form');
+                            resolve();
+                        },
+                    },
+                };
+
+                const rzp = new (window as any).Razorpay(options);
+                rzp.on('payment.failed', (resp: any) => {
+                    toastError(
+                        'Payment Failed',
+                        resp.error?.description || 'Payment was declined.'
+                    );
+                    setPageState('form');
+                    reject(new Error(resp.error?.description));
+                });
+                rzp.open();
+            });
+        } catch (err: any) {
+            toastError('Payment Error', err.message || 'Something went wrong.');
+            setPageState('form');
+        }
+    };
+
+    const handleMockPay = async () => {
         if (!paymentData || !isFormValid()) return;
         setPageState("processing");
         setProcessingMsg(0);
@@ -475,212 +623,239 @@ export default function PaymentPage() {
                                 Your slot is reserved. Complete payment to confirm your appointment.
                             </p>
 
-                            {/* Tabs */}
-                            <div className="flex gap-1 p-1 bg-primary/5 rounded-xl mb-8">
-                                {tabs.map((tab) => (
+                            {/* ─── Dynamically render Tabs + Form OR Razorpay Placeholder ─── */}
+                            {PAYMENT_MODE !== 'razorpay' ? (
+                                <>
+                                    {/* Tabs */}
+                                    <div className="flex gap-1 p-1 bg-primary/5 rounded-xl mb-8">
+                                        {tabs.map((tab) => (
+                                            <button
+                                                key={tab.key}
+                                                onClick={() => setActiveTab(tab.key)}
+                                                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.key
+                                                    ? "bg-white text-primary shadow-sm"
+                                                    : "text-primary/40 hover:text-primary/60"
+                                                    }`}
+                                            >
+                                                {tab.icon}
+                                                <span className="hidden sm:inline">{tab.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {/* ─── Card Tab ─────────────────────────── */}
+                                    {activeTab === "card" && (
+                                        <div className="space-y-5">
+                                            <div>
+                                                <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Card Number</label>
+                                                <div className="relative">
+                                                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
+                                                    <input
+                                                        type="text"
+                                                        value={cardNumber}
+                                                        onChange={(e) => handleCardNumber(e.target.value)}
+                                                        placeholder="0000 0000 0000 0000"
+                                                        className="w-full border border-primary/15 rounded-xl pl-12 pr-4 py-3.5 bg-white text-primary font-mono tracking-wider focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
+                                                    />
+                                                </div>
+                                                <p className="text-[10px] text-primary/25 mt-1.5">Use any 16-digit number for demo</p>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Expiry</label>
+                                                    <input
+                                                        type="text"
+                                                        value={expiry}
+                                                        onChange={(e) => handleExpiry(e.target.value)}
+                                                        placeholder="MM/YY"
+                                                        className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary font-mono focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">CVV</label>
+                                                    <input
+                                                        type="password"
+                                                        value={cvv}
+                                                        onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                                                        placeholder="•••"
+                                                        maxLength={3}
+                                                        className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary font-mono focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Cardholder Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={cardName}
+                                                    onChange={(e) => setCardName(e.target.value)}
+                                                    placeholder="Full name on card"
+                                                    className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
+                                                />
+                                            </div>
+
+                                            <label className="flex items-center gap-2.5 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={saveCard}
+                                                    onChange={(e) => setSaveCard(e.target.checked)}
+                                                    className="w-4 h-4 rounded border-primary/20 text-primary focus:ring-primary/30"
+                                                />
+                                                <span className="text-sm text-primary/50">Save this card for future payments</span>
+                                            </label>
+                                        </div>
+                                    )}
+
+                                    {/* ─── UPI Tab ──────────────────────────── */}
+                                    {activeTab === "upi" && (
+                                        <div className="space-y-5">
+                                            <div>
+                                                <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">UPI ID</label>
+                                                <input
+                                                    type="text"
+                                                    value={upiId}
+                                                    onChange={(e) => setUpiId(e.target.value)}
+                                                    placeholder="yourname@upi"
+                                                    className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
+                                                />
+                                                <p className="text-[10px] text-primary/25 mt-1.5">Use any valid UPI format for demo</p>
+                                            </div>
+
+                                            <div className="relative">
+                                                <div className="flex items-center gap-3 my-4">
+                                                    <div className="flex-1 h-px bg-primary/10" />
+                                                    <span className="text-[10px] font-bold text-primary/30 uppercase">Or</span>
+                                                    <div className="flex-1 h-px bg-primary/10" />
+                                                </div>
+
+                                                <button
+                                                    onClick={() => setShowQR(!showQR)}
+                                                    className="w-full border-2 border-dashed border-primary/15 rounded-xl py-3 text-sm font-bold text-primary/40 hover:border-primary/30 hover:text-primary/60 transition-all"
+                                                >
+                                                    {showQR ? "Hide QR Code" : "Pay via QR Code"}
+                                                </button>
+
+                                                {showQR && (
+                                                    <div className="mt-4 flex flex-col items-center">
+                                                        <div className="w-48 h-48 bg-white border-2 border-primary/10 rounded-2xl flex items-center justify-center relative overflow-hidden">
+                                                            <div className="grid grid-cols-8 gap-0.5 w-36 h-36 opacity-20">
+                                                                {Array.from({ length: 64 }).map((_, i) => (
+                                                                    <div key={i} className={`${Math.random() > 0.5 ? "bg-primary" : "bg-transparent"}`} />
+                                                                ))}
+                                                            </div>
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <div className="bg-white px-3 py-1 rounded-lg">
+                                                                    <span className="text-xs font-bold text-primary">Scan to Pay</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-xs text-primary/30 mt-2">Scan with any UPI app</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ─── Net Banking Tab ──────────────────── */}
+                                    {activeTab === "netbanking" && (
+                                        <div className="space-y-5">
+                                            <p className="text-xs font-bold text-primary/40 uppercase tracking-wider">Select Your Bank</p>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {BANKS.map((bank) => (
+                                                    <button
+                                                        key={bank.code}
+                                                        onClick={() => setSelectedBank(bank.code)}
+                                                        className={`border-2 rounded-xl p-4 text-center transition-all ${selectedBank === bank.code
+                                                            ? "border-primary bg-primary/5 text-primary"
+                                                            : "border-primary/10 hover:border-primary/25 text-primary/50"
+                                                            }`}
+                                                    >
+                                                        <span className="block text-lg font-bold">{bank.code}</span>
+                                                        <span className="block text-[10px] mt-0.5 opacity-60">{bank.name}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Other Banks</label>
+                                                <select className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all">
+                                                    <option value="">Select a bank...</option>
+                                                    <option value="bob">Bank of Baroda</option>
+                                                    <option value="pnb">Punjab National Bank</option>
+                                                    <option value="union">Union Bank</option>
+                                                    <option value="canara">Canara Bank</option>
+                                                    <option value="idbi">IDBI Bank</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ─── Wallets Tab ──────────────────────── */}
+                                    {activeTab === "wallets" && (
+                                        <div className="space-y-5">
+                                            <p className="text-xs font-bold text-primary/40 uppercase tracking-wider">Select Wallet</p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {WALLETS.map((w) => (
+                                                    <button
+                                                        key={w.id}
+                                                        onClick={() => setSelectedWallet(w.id)}
+                                                        className={`border-2 rounded-xl p-4 flex items-center gap-3 transition-all ${selectedWallet === w.id
+                                                            ? "border-primary bg-primary/5"
+                                                            : "border-primary/10 hover:border-primary/25"
+                                                            }`}
+                                                    >
+                                                        <div
+                                                            className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                                                            style={{ backgroundColor: w.color }}
+                                                        >
+                                                            {w.name.slice(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <span className="font-bold text-sm text-primary">{w.name}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* ─── Pay Button ────────────────────────── */}
                                     <button
-                                        key={tab.key}
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-bold transition-all ${activeTab === tab.key
-                                            ? "bg-white text-primary shadow-sm"
-                                            : "text-primary/40 hover:text-primary/60"
+                                        onClick={handlePay}
+                                        disabled={!isFormValid()}
+                                        className={`w-full mt-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${isFormValid()
+                                            ? "bg-primary text-white shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98]"
+                                            : "bg-primary/10 text-primary/30 cursor-not-allowed"
                                             }`}
                                     >
-                                        {tab.icon}
-                                        <span className="hidden sm:inline">{tab.label}</span>
+                                        <Lock size={16} />
+                                        Pay ₹{total.toLocaleString("en-IN")}
+                                        <ChevronRight size={16} />
                                     </button>
-                                ))}
-                            </div>
-
-                            {/* ─── Card Tab ─────────────────────────── */}
-                            {activeTab === "card" && (
-                                <div className="space-y-5">
+                                </>
+                            ) : (
+                                <div className="py-12 text-center space-y-6">
+                                    <div className="size-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Lock className="text-primary" size={28} />
+                                    </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Card Number</label>
-                                        <div className="relative">
-                                            <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
-                                            <input
-                                                type="text"
-                                                value={cardNumber}
-                                                onChange={(e) => handleCardNumber(e.target.value)}
-                                                placeholder="0000 0000 0000 0000"
-                                                className="w-full border border-primary/15 rounded-xl pl-12 pr-4 py-3.5 bg-white text-primary font-mono tracking-wider focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
-                                            />
-                                        </div>
-                                        <p className="text-[10px] text-primary/25 mt-1.5">Use any 16-digit number for demo</p>
+                                        <h3 className="font-display text-xl font-bold text-primary mb-2">
+                                            Secure Razorpay Checkout
+                                        </h3>
+                                        <p className="text-primary/50 text-sm">
+                                            Click below to complete payment via Razorpay.
+                                            Supports UPI, cards, net banking, and wallets.
+                                        </p>
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Expiry</label>
-                                            <input
-                                                type="text"
-                                                value={expiry}
-                                                onChange={(e) => handleExpiry(e.target.value)}
-                                                placeholder="MM/YY"
-                                                className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary font-mono focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">CVV</label>
-                                            <input
-                                                type="password"
-                                                value={cvv}
-                                                onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                                                placeholder="•••"
-                                                maxLength={3}
-                                                className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary font-mono focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Cardholder Name</label>
-                                        <input
-                                            type="text"
-                                            value={cardName}
-                                            onChange={(e) => setCardName(e.target.value)}
-                                            placeholder="Full name on card"
-                                            className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
-                                        />
-                                    </div>
-
-                                    <label className="flex items-center gap-2.5 cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            checked={saveCard}
-                                            onChange={(e) => setSaveCard(e.target.checked)}
-                                            className="w-4 h-4 rounded border-primary/20 text-primary focus:ring-primary/30"
-                                        />
-                                        <span className="text-sm text-primary/50">Save this card for future payments</span>
-                                    </label>
+                                    <button
+                                        onClick={handlePay}
+                                        className="w-full py-4 rounded-xl font-bold text-lg bg-primary text-white shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Lock size={16} />
+                                        Pay ₹{total.toLocaleString('en-IN')} via Razorpay
+                                    </button>
                                 </div>
                             )}
-
-                            {/* ─── UPI Tab ──────────────────────────── */}
-                            {activeTab === "upi" && (
-                                <div className="space-y-5">
-                                    <div>
-                                        <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">UPI ID</label>
-                                        <input
-                                            type="text"
-                                            value={upiId}
-                                            onChange={(e) => setUpiId(e.target.value)}
-                                            placeholder="yourname@upi"
-                                            className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all placeholder:text-primary/20"
-                                        />
-                                        <p className="text-[10px] text-primary/25 mt-1.5">Use any valid UPI format for demo</p>
-                                    </div>
-
-                                    <div className="relative">
-                                        <div className="flex items-center gap-3 my-4">
-                                            <div className="flex-1 h-px bg-primary/10" />
-                                            <span className="text-[10px] font-bold text-primary/30 uppercase">Or</span>
-                                            <div className="flex-1 h-px bg-primary/10" />
-                                        </div>
-
-                                        <button
-                                            onClick={() => setShowQR(!showQR)}
-                                            className="w-full border-2 border-dashed border-primary/15 rounded-xl py-3 text-sm font-bold text-primary/40 hover:border-primary/30 hover:text-primary/60 transition-all"
-                                        >
-                                            {showQR ? "Hide QR Code" : "Pay via QR Code"}
-                                        </button>
-
-                                        {showQR && (
-                                            <div className="mt-4 flex flex-col items-center">
-                                                <div className="w-48 h-48 bg-white border-2 border-primary/10 rounded-2xl flex items-center justify-center relative overflow-hidden">
-                                                    <div className="grid grid-cols-8 gap-0.5 w-36 h-36 opacity-20">
-                                                        {Array.from({ length: 64 }).map((_, i) => (
-                                                            <div key={i} className={`${Math.random() > 0.5 ? "bg-primary" : "bg-transparent"}`} />
-                                                        ))}
-                                                    </div>
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <div className="bg-white px-3 py-1 rounded-lg">
-                                                            <span className="text-xs font-bold text-primary">Scan to Pay</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <p className="text-xs text-primary/30 mt-2">Scan with any UPI app</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ─── Net Banking Tab ──────────────────── */}
-                            {activeTab === "netbanking" && (
-                                <div className="space-y-5">
-                                    <p className="text-xs font-bold text-primary/40 uppercase tracking-wider">Select Your Bank</p>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {BANKS.map((bank) => (
-                                            <button
-                                                key={bank.code}
-                                                onClick={() => setSelectedBank(bank.code)}
-                                                className={`border-2 rounded-xl p-4 text-center transition-all ${selectedBank === bank.code
-                                                    ? "border-primary bg-primary/5 text-primary"
-                                                    : "border-primary/10 hover:border-primary/25 text-primary/50"
-                                                    }`}
-                                            >
-                                                <span className="block text-lg font-bold">{bank.code}</span>
-                                                <span className="block text-[10px] mt-0.5 opacity-60">{bank.name}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-bold text-primary/40 uppercase tracking-wider mb-2">Other Banks</label>
-                                        <select className="w-full border border-primary/15 rounded-xl px-4 py-3.5 bg-white text-primary focus:ring-2 focus:ring-primary/30 outline-none transition-all">
-                                            <option value="">Select a bank...</option>
-                                            <option value="bob">Bank of Baroda</option>
-                                            <option value="pnb">Punjab National Bank</option>
-                                            <option value="union">Union Bank</option>
-                                            <option value="canara">Canara Bank</option>
-                                            <option value="idbi">IDBI Bank</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ─── Wallets Tab ──────────────────────── */}
-                            {activeTab === "wallets" && (
-                                <div className="space-y-5">
-                                    <p className="text-xs font-bold text-primary/40 uppercase tracking-wider">Select Wallet</p>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {WALLETS.map((w) => (
-                                            <button
-                                                key={w.id}
-                                                onClick={() => setSelectedWallet(w.id)}
-                                                className={`border-2 rounded-xl p-4 flex items-center gap-3 transition-all ${selectedWallet === w.id
-                                                    ? "border-primary bg-primary/5"
-                                                    : "border-primary/10 hover:border-primary/25"
-                                                    }`}
-                                            >
-                                                <div
-                                                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-xs font-black"
-                                                    style={{ backgroundColor: w.color }}
-                                                >
-                                                    {w.name.slice(0, 2).toUpperCase()}
-                                                </div>
-                                                <span className="font-bold text-sm text-primary">{w.name}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* ─── Pay Button ────────────────────────── */}
-                            <button
-                                onClick={handlePay}
-                                disabled={!isFormValid()}
-                                className={`w-full mt-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all ${isFormValid()
-                                    ? "bg-primary text-white shadow-lg shadow-primary/25 hover:opacity-90 active:scale-[0.98]"
-                                    : "bg-primary/10 text-primary/30 cursor-not-allowed"
-                                    }`}
-                            >
-                                <Lock size={16} />
-                                Pay ₹{total.toLocaleString("en-IN")}
-                                <ChevronRight size={16} />
-                            </button>
 
                             {/* ─── Trust Badges ──────────────────────── */}
                             <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-primary/5">

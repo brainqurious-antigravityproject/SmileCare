@@ -12,6 +12,7 @@ export interface VerifyPaymentBody {
     treatmentId: string;
     sessionId: string;
     idempotencyKey: string;
+    amount?: number;
 }
 
 export interface MockOrder {

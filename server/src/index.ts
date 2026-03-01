@@ -19,6 +19,24 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+import rateLimit from 'express-rate-limit';
+
+// Global rate limit — catches all routes not covered by specific limiters
+const globalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.path === '/health' ||
+        process.env.NODE_ENV === 'test',
+    message: {
+        success: false,
+        error: 'Too many requests.',
+    },
+});
+
+app.use(globalLimiter);
+
 // Routes
 import authRoutes from './routes/authRoutes';
 import bookingRoutes from './modules/booking/booking.routes';

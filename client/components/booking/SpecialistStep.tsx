@@ -47,6 +47,7 @@ export default function SpecialistStep({ specialists, selectedId, onSelect, isLo
                                     src={specialist.photoUrl || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=200"}
                                     alt={specialist.name}
                                     fill
+                                    sizes="64px"
                                     className="object-cover"
                                 />
                             </div>
@@ -63,17 +64,19 @@ export default function SpecialistStep({ specialists, selectedId, onSelect, isLo
                                 </div>
                             </div>
 
-                            {isSelected ? (
-                                <span className="material-symbols-outlined text-primary text-2xl">check_circle</span>
-                            ) : (
-                                <button className="rounded-lg bg-primary/5 px-4 py-1.5 text-[10px] font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                                    Select
-                                </button>
-                            )}
+                            {
+                                isSelected ? (
+                                    <span className="material-symbols-outlined text-primary text-2xl">check_circle</span>
+                                ) : (
+                                    <button className="rounded-lg bg-primary/5 px-4 py-1.5 text-[10px] font-bold text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                                        Select
+                                    </button>
+                                )
+                            }
                         </div>
                     );
                 })}
             </div>
-        </section>
+        </section >
     );
 }
