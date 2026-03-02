@@ -50,6 +50,7 @@ import reminderRoutes from './modules/reminder/reminder.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import cmsRoutes from './modules/cms/cms.routes';
 import loyaltyRoutes from './modules/loyalty/loyalty.routes';
+import chatbotRoutes from './modules/chatbot/chatbot.routes';
 app.use('/api/auth', authRoutes);
 app.use('/api', bookingRoutes);
 app.use('/api', paymentRoutes);
@@ -62,6 +63,7 @@ app.use('/api', reminderRoutes);
 app.use('/api', adminRoutes);
 app.use('/api', cmsRoutes);
 app.use('/api', loyaltyRoutes);
+app.use('/api', chatbotRoutes);
 
 // Health Check
 app.get('/health', (req: Request, res: Response) => {

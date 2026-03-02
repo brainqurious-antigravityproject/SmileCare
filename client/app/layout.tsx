@@ -3,6 +3,7 @@ import { Noto_Serif, Noto_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
+import ChatWidget from "@/components/chatbot/ChatWidget";
 
 const notoSerif = Noto_Serif({
   variable: "--font-noto-serif",
@@ -38,6 +39,9 @@ export default function RootLayout({
         <ToastProvider>
           <AuthProvider>
             {children}
+            {process.env.NEXT_PUBLIC_CHATBOT_ENABLED === 'true' && (
+              <ChatWidget />
+            )}
           </AuthProvider>
         </ToastProvider>
       </body>
