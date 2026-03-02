@@ -73,9 +73,18 @@ app.get('/health', (req: Request, res: Response) => {
 import { startReminderJob } from './modules/reminder/reminder.service';
 
 // Start Server
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     startReminderJob();
+});
+
+server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\n[Server] ❌ Port ${PORT} is already in use.\nRun: netstat -ano | findstr :${PORT}  then  taskkill /PID <PID> /F\n`);
+        process.exit(1);
+    } else {
+        throw err;
+    }
 });
 
 export { app, prisma };

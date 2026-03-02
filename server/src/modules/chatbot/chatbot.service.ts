@@ -267,8 +267,9 @@ STRICT RULES:
 10. Loyalty points: patients earn points on every booking — mention this when relevant.
 
 RESPONSE FORMAT:
-- Plain text only. No markdown headers. No bullet points in responses.
-- Short paragraphs. Conversational tone.
+- Use light markdown: **bold** for treatment names and prices, line breaks between paragraphs.
+- No headers (##), no horizontal rules, no tables.
+- Short paragraphs. Conversational tone. Keep under 120 words unless detail is requested.
 - End with a natural follow-up question or next step when appropriate.`;
 }
 
@@ -304,6 +305,10 @@ const STUBS: Record<string, string> = {
         "I'm here to help! Could you tell me more about what you need? " +
         "I can assist with appointments, treatments, pricing, or general queries.",
 };
+
+function stripThinkingTags(text: string): string {
+    return text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+}
 
 // ── Main exported function ────────────────────────────────
 export async function getChatbotResponse(
@@ -373,13 +378,12 @@ export async function getChatbotResponse(
             model,
             messages,
             temperature: 0.35,        // consistent, on-brand responses
-            max_tokens: 250,          // chat-sized responses
+            max_tokens: 1024,         // padding for reasoning buffer
             top_p: 0.9,
         });
 
-        const reply =
-            completion.choices[0]?.message?.content?.trim() ||
-            STUBS.general_faq;
+        const rawReply = completion.choices[0]?.message?.content || '';
+        const reply = stripThinkingTags(rawReply) || STUBS.general_faq;
 
         return {
             reply,
