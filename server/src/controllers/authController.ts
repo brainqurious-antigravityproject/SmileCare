@@ -3,6 +3,9 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 
+// Detect if running in production (Render deployment)
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
 export const register = async (req: Request, res: Response) => {
     try {
         const { name, email, phone, password, role } = req.body;
@@ -72,9 +75,9 @@ export const login = async (req: Request, res: Response) => {
 
         res.cookie('accessToken', token, {
             httpOnly: true,
-            sameSite: 'lax',
-            secure: false, // true in production
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            sameSite: IS_PRODUCTION ? 'none' : 'lax',  // 'none' required for cross-origin (Vercel ↔ Render)
+            secure: IS_PRODUCTION,                       // true on HTTPS (production), false on localhost
+            maxAge: 7 * 24 * 60 * 60 * 1000,            // 7 days
         });
 
         return res.status(200).json({ message: 'Login successful' });
@@ -88,8 +91,8 @@ export const login = async (req: Request, res: Response) => {
 export const logout = async (req: Request, res: Response) => {
     res.clearCookie('accessToken', {
         httpOnly: true,
-        sameSite: 'lax',
-        secure: false, // true in production
+        sameSite: IS_PRODUCTION ? 'none' : 'lax',  // Must match the settings used when cookie was set
+        secure: IS_PRODUCTION,                       // Must match the settings used when cookie was set
     });
     res.status(200).json({ message: 'Logged out successfully' });
 };
