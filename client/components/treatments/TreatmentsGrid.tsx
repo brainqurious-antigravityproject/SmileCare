@@ -29,13 +29,20 @@ const TreatmentsGrid = () => {
             .then((res) => (res.ok ? res.json() : null))
             .then((data: any[] | null) => {
                 if (data && data.length > 0) {
+                    const CATEGORY_MAP: Record<string, string> = {
+                        cosmetic: "Cosmetic",
+                        orthodontics: "Orthodontics",
+                        restorative: "Restorative",
+                        preventative: "Preventative",
+                        general: "General",
+                    };
                     const mapped: Treatment[] = data.map((t) => ({
                         id: t.id,
                         title: t.name,
                         slug: t.slug,
-                        category: t.category?.name || "General",
+                        category: CATEGORY_MAP[t.category?.name?.toLowerCase()] || t.category?.name || "General",
                         description: t.description || "",
-                        image: t.imageUrl || "",
+                        image: t.imageUrl || "/images/treatments/placeholder.jpg",
                     }));
                     setTreatments(mapped);
                 }
