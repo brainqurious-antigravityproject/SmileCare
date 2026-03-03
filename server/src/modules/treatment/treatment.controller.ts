@@ -1,15 +1,18 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../lib/prisma';
 
+
 export const getTreatments = async (req: Request, res: Response): Promise<void> => {
     try {
         const treatments = await prisma.treatment.findMany({
+            where: { isActive: true },
             orderBy: { name: 'asc' },
             select: {
                 id: true,
-                name: true,           // NOT "title"
+                name: true,
+                slug: true,
                 description: true,
-                priceRange: true,     // NOT "price"
+                priceRange: true,
                 imageUrl: true,
                 category: {
                     select: { name: true }
@@ -23,12 +26,14 @@ export const getTreatments = async (req: Request, res: Response): Promise<void> 
     }
 };
 
+
 export const getTreatmentBySlugApi = async (
     req: Request,
     res: Response
 ): Promise<void> => {
     try {
         const { slug } = req.params;
+
 
         const treatment = await prisma.treatment.findUnique({
             where: { slug },
@@ -45,10 +50,12 @@ export const getTreatmentBySlugApi = async (
             },
         });
 
+
         if (!treatment) {
             res.status(404).json({ message: 'Treatment not found' });
             return;
         }
+
 
         res.status(200).json(treatment);
     } catch (error) {
