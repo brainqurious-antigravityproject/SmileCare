@@ -23,8 +23,8 @@ function LoginForm() {
         setError("");
         setLoading(true);
         try {
-            await login(email, password);
-            // login() in AuthContext handles refreshUser + router.push automatically
+            // Pass redirectTo so AuthContext can redirect to the original page
+            await login(email, password, redirectTo);
         } catch (err: any) {
             setError(err.message || "Invalid credentials. Please try again.");
         } finally {
