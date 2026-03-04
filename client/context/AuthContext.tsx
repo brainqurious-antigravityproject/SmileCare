@@ -21,7 +21,7 @@ interface AuthContextType {
     login: (email: string, password: string, redirectTo?: string) => Promise<void>;
     register: (name: string, email: string, phone: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
-    refreshUser: () => Promise<void>;
+    refreshUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
