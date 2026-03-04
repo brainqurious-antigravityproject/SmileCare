@@ -18,7 +18,7 @@ interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string, redirectTo?: string) => Promise<void>;
     register: (name: string, email: string, phone: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
     const { success, error: toastError } = useToast();
 
-    const refreshUser = async () => {
+    const refreshUser = async (): Promise<User | null> => {
         try {
             const res = await fetch(`${API}/api/auth/me`, {
                 credentials: "include",
@@ -40,15 +40,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (res.ok) {
                 const data = await res.json();
                 setUser(data);
+                return data;
             } else {
                 setUser(null);
+                return null;
             }
         } catch (error: any) {
-            // 401 = not authenticated, expected for public pages — do NOT log
             if (error?.status !== 401 && error?.message !== 'Unauthorized') {
                 console.error('Auth refresh error:', error);
             }
             setUser(null);
+            return null;
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshUser();
     }, []);
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, password: string, redirectTo?: string) => {
         const res = await fetch(`${API}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -71,10 +73,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             toastError("Login Failed", msg);
             throw new Error(msg);
         }
-        await refreshUser();
+        // Refresh user to get actual role from server
+        const updatedUser = await refreshUser();
         success("Welcome back!", "You've been logged in successfully.");
-        const role = data.role || data.user?.role;
-        router.push(role === "admin" ? "/admin" : "/dashboard");
+        // Determine redirect destination
+        if (redirectTo && redirectTo !== "/login" && redirectTo !== "/signup") {
+            router.push(redirectTo);
+        } else {
+            const role = updatedUser?.role;
+            router.push(role === "admin" ? "/admin" : "/dashboard");
+        }
     };
 
     const register = async (name: string, email: string, phone: string, password: string) => {
@@ -104,9 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider
-            value={{ user, isLoading, isAuthenticated: !!user, login, register, logout, refreshUser }}
-        >
+        <AuthContext.Provider value={{ user, isLoading, isAuthenticated: !!user, login, register, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );
