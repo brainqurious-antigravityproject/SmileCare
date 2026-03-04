@@ -8,7 +8,6 @@ import type { Treatment } from "./TreatmentCard";
 import { TREATMENTS } from "@/lib/treatments-data";
 // TODO: fetch treatments from API
 
-
 const STATIC_TREATMENTS: Treatment[] = TREATMENTS.map((t) => ({
     id: t.id,
     title: t.title,
@@ -36,14 +35,16 @@ const TreatmentsGrid = () => {
 
     return (
         <div>
-            <TreatmentsSearch
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-            />
-            <TreatmentsFilterBar
-                activeCategory={activeCategory}
-                setActiveCategory={setActiveCategory}
-            />
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+                <TreatmentsSearch
+                    searchQuery={searchQuery}
+                    setSearchQuery={setSearchQuery}
+                />
+                <TreatmentsFilterBar
+                    activeCategory={activeCategory}
+                    setActiveCategory={setActiveCategory}
+                />
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                 {filteredTreatments.map((treatment) => (
                     <TreatmentCard key={treatment.slug} treatment={treatment} />
