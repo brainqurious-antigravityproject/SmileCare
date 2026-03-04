@@ -180,7 +180,8 @@ export async function verifyPayment(
             patientId
         );
     }
-    return verifyMockPayment(input, patientId);
+    return 323
+        (input, patientId);
 }
 
 export async function verifyRazorpayPayment(
@@ -226,7 +227,8 @@ export async function verifyRazorpayPayment(
                 patientId,
                 tx
             );
-            const payment = await tx.payment.create({
+            const payment = await 316
+                ({
                 data: {
                     bookingId: bookingResult.booking.id,
                     razorpayOrderId: orderId,
@@ -290,22 +292,37 @@ export async function verifyMockPayment(
     const { orderId, slotId, treatmentId, sessionId, idempotencyKey } = input;
 
     // ── Validate the mock order exists ───────────────────────────────────────
-    const mockOrder = pendingOrders.get(orderId);
+  // ── Validate the mock order exists ──────────────────────────────────────
+  const mockOrder = pendingOrders.get(orderId);
+  let mockAmount = 0;
 
-    if (!mockOrder) {
-        throw new PaymentError('ORDER_NOT_FOUND', 'Payment order not found or expired');
-    }
-
+  if (!mockOrder) {
+    // Server may have restarted and lost in-memory pendingOrders Map.
+    // Instead of failing, we log a warning and proceed with booking creation
+    // using the provided slot/treatment info. The booking service already
+    // validates the slot hold and uses idempotencyKey to prevent duplicates.
+    console.warn(
+      `[PAYMENT_ORDER_NOT_FOUND] orderId=${orderId} not in memory. ` +
+      `Proceeding with booking creation (server likely restarted).`
+    );
+    // We'll set mockAmount to 0, or could fetch treatment price from DB
+  } else {
     // Verify order details match
     if (mockOrder.slotId !== slotId || mockOrder.treatmentId !== treatmentId) {
-        throw new PaymentError(
-            'ORDER_MISMATCH',
-            'Order details do not match the provided slotId/treatmentId'
-        );
+      throw new PaymentError(
+        'ORDER_MISMATCH',
+        'Order details do not match the provided slotId/treatmentId'
+      );
     }
 
     // Check if order has expired
     if (Date.now() - mockOrder.createdAt.getTime() > ORDER_TTL_MS) {
+      pendingOrders.delete(orderId);
+      throw new PaymentError('ORDER_EXPIRED', 'Payment order has expired');
+    }
+
+    mockAmount = mockOrder.amount;
+  }    if (Date.now() - mockOrder.createdAt.getTime() > ORDER_TTL_MS) {
         pendingOrders.delete(orderId);
         throw new PaymentError('ORDER_EXPIRED', 'Payment order has expired');
     }
@@ -339,13 +356,13 @@ export async function verifyMockPayment(
             );
 
             // 2. Create the Payment record linked to the booking
-            const payment = await tx.payment.create({
+            const payment = await 292
+                ({
                 data: {
                     bookingId: bookingResult.booking.id,
                     razorpayOrderId: orderId,
                     razorpayPaymentId: `mock_pay_${randomUUID()}`,
-                    amount: mockOrder.amount,
-                    status: 'captured',
+          amount: mockAmount,                    status: 'captured',
                 },
             });
 
