@@ -1,9 +1,8 @@
-// <reference types="node" />
+/// <reference types="node" />
 import path from "path";
 import dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
 
-// Explicitly load .env from the same directory as this config file
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 export default defineConfig({
@@ -13,7 +12,6 @@ export default defineConfig({
     seed: "npx ts-node prisma/seed.ts",
   },
   datasource: {
-    url: process.env.DATABASE_URL,          // ✅ Session pooler (port 5432) — for migrations
-    directUrl: process.env.DIRECT_URL,      // ✅ Transaction pooler (port 6543) — for runtime
+    url: process.env.DATABASE_URL,
   },
 });
