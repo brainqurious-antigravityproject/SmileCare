@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import { Loader2 } from "lucide-react";
@@ -11,37 +11,39 @@ export default function DashboardLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const { user, isLoading, isAuthenticated } = useAuth();
-    const router = useRouter();
+    const { isLoading, isAuthenticated } = useAuth();
     const pathname = usePathname();
 
     useEffect(() => {
+        // Only redirect after auth check is complete
         if (!isLoading && !isAuthenticated) {
-            // Redirect to login with current path as redirect destination
-            router.replace(`/login?redirect=${encodeURIComponent(pathname)}`);
+            // Use window.location for hard redirect - ensures clean
+            // navigation that works correctly with cross-origin cookies
+            window.location.href = `/login?redirect=${encodeURIComponent(pathname)}`;
         }
-    }, [isLoading, isAuthenticated, router, pathname]);
+    }, [isLoading, isAuthenticated, pathname]);
 
-    // Show loading spinner while checking auth
+    // Show spinner while checking auth state
     if (isLoading) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-background-light">
+            <div className="flex min-h-screen items-center justify-center">
                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
         );
     }
 
-    // Don't render dashboard content if not authenticated
+    // Show spinner while redirecting to login (unauthenticated)
     if (!isAuthenticated) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-background-light">
+            <div className="flex min-h-screen items-center justify-center">
                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
         );
     }
 
+    // Authenticated - render the dashboard with sidebar
     return (
-        <div className="flex min-h-screen bg-background-light">
+        <div className="flex min-h-screen bg-gray-50">
             <Sidebar />
             <main className="flex-1 overflow-y-auto">
                 {children}
