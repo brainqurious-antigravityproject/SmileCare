@@ -38,21 +38,29 @@ export function getLocalBookings(): LocalBooking[] {
 
 /** Returns only future bookings. */
 export function getLocalUpcomingBookings(): LocalBooking[] {
-    const now = new Date();
-    return readStorage().filter((b) => {
-        if (!b.date) return true;
-        return new Date(b.date) >= now;
-    });
-}
+  // Get today's date at midnight for proper comparison
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  return readStorage().filter((b) => {
+    if (!b.date) return true; // No date = show in upcoming
+    const bookingDate = new Date(b.date);
+    bookingDate.setHours(0, 0, 0, 0);
+    return bookingDate >= now;
+  });}
 
 /** Returns only past bookings. */
 export function getLocalHistoryBookings(): LocalBooking[] {
-    const now = new Date();
-    return readStorage().filter((b) => {
-        if (!b.date) return false;
-        return new Date(b.date) < now;
-    });
-}
+  // Get today's date at midnight for proper comparison
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  
+  return readStorage().filter((b) => {
+    if (!b.date) return false; // No date = don't show in history
+    const bookingDate = new Date(b.date);
+    bookingDate.setHours(0, 0, 0, 0);
+    return bookingDate < now;
+  });}
 
 /** Appends a new booking. Prevents duplicate IDs. */
 export function addLocalBooking(booking: LocalBooking): void {
