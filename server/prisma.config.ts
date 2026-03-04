@@ -1,4 +1,4 @@
-/// <reference types="node" />
+// <reference types="node" />
 import path from "path";
 import dotenv from "dotenv";
 import { defineConfig } from "prisma/config";
@@ -13,6 +13,7 @@ export default defineConfig({
     seed: "npx ts-node prisma/seed.ts",
   },
   datasource: {
-    url: process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL,          // ✅ Session pooler (port 5432) — for migrations
+    directUrl: process.env.DIRECT_URL,      // ✅ Transaction pooler (port 6543) — for runtime
   },
 });
