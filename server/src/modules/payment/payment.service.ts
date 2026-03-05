@@ -322,6 +322,7 @@ export async function verifyMockPayment(
     }
 
     mockAmount = mockOrder.amount;
+        }
   
     // ── Check for idempotent payment (already captured) ─────────────────────
     const existingPayment = await prisma.payment.findFirst({
