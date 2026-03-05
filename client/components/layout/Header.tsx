@@ -5,8 +5,6 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
 const Header = () => {
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -27,8 +25,8 @@ const Header = () => {
 
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 sm:px-8">
-                <div className="flex justify-between items-center h-20 relative px-4 sm:px-6 lg:px-4 sm:px-8">
+            <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="flex justify-between items-center h-20 relative">
                     {/* Logo */}
                     <div className="flex-shrink-0 flex items-center z-10">
                         <Link href="/" className="text-2xl font-display font-bold text-primary">
@@ -50,7 +48,7 @@ const Header = () => {
                     </div>
 
                     {/* Desktop Auth Buttons */}
-                    <div className="hidden md:flex items-center space-x-6 z-10">
+                    <div className="hidden md:flex items-center space-x-4 z-10">
                         {isAuthenticated ? (
                             <>
                                 <Link
@@ -70,15 +68,15 @@ const Header = () => {
                             <>
                                 <Link
                                     href="/login"
-                                    className="text-primary font-semibold border-2 border-primary/20 px-6 py-2 rounded-full hover:bg-primary/5 hover:border-primary/40 transition-all active:scale-95"
+                                    className="text-primary font-semibold border-2 border-primary/20 px-5 py-2 rounded-full hover:bg-primary/5 hover:border-primary/40 transition-all active:scale-95"
                                 >
                                     Login
                                 </Link>
                                 <Link
-                                    href="/signup"
-                                    className="bg-primary text-white border-2 border-primary px-6 py-2 rounded-full font-semibold hover:bg-navy-deep hover:border-navy-deep transition-all shadow-md active:scale-95"
+                                    href="/booking"
+                                    className="bg-primary text-white border-2 border-primary px-5 py-2 rounded-full font-semibold hover:bg-navy-deep hover:border-navy-deep transition-all shadow-md active:scale-95 whitespace-nowrap"
                                 >
-                                    Sign Up
+                                    Book Appointment
                                 </Link>
                             </>
                         )}
@@ -162,11 +160,11 @@ const Header = () => {
                                     Login
                                 </Link>
                                 <Link
-                                    href="/signup"
+                                    href="/booking"
                                     className="block px-3 py-3 mt-4 bg-primary text-white text-center rounded-lg font-semibold"
                                     onClick={() => setIsMenuOpen(false)}
                                 >
-                                    Create Account
+                                    Book Appointment
                                 </Link>
                             </>
                         )}

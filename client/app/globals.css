@@ -64,6 +64,27 @@
   }
 }
 
+/* Infinite scroll animation for SmileGallery */
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.infinite-scroll-track {
+  display: flex;
+  width: max-content;
+  animation: infinite-scroll 35s linear infinite;
+  will-change: transform;
+}
+
+.infinite-scroll-track:hover {
+  animation-play-state: paused;
+}
+
 /* Material Symbols Global Icon System */
 .material-symbols-outlined {
   font-variation-settings:
