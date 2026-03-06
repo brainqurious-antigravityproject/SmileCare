@@ -86,12 +86,18 @@ const Header = () => {
                     <div className="md:hidden flex items-center gap-2">
                         {/* Book Appointment button outside drawer */}
                         {!isAuthenticated && (
-                            <Link
-                                href="/booking"
-                                className="bg-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md active:scale-95 transition-all whitespace-nowrap"
-                            >
-                                Book Appt
-                            </Link>
+                           <Link
+  href="/booking"
+  className="
+    bg-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md
+    transition-all whitespace-nowrap
+    hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg
+    active:scale-95 active:opacity-90
+  "
+>
+  Appointment
+</Link>
+
                         )}
                         {isAuthenticated && (
                             <Link
