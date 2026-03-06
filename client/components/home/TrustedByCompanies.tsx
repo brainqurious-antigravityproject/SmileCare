@@ -34,6 +34,7 @@ const TrustedByCompanies = () => {
 
 
 
+
               {/* Desktop plain text */}
               <p
                 className="hidden sm:block text-lg sm:text-xl font-display font-bold leading-none transition-colors duration-300"
