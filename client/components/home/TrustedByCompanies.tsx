@@ -5,8 +5,8 @@ const brands = [
   { name: "ADA", full: "American Dental Association" },
   { name: "ISO", full: "ISO 9001 Certified" },
   { name: "BDA", full: "British Dental Assoc." },
-  { name: "invisalign\u2122", full: "Gold Provider" },
-  { name: "CEREC\u00ae", full: "Certified Clinic" },
+  { name: "invisalign™", full: "Gold Provider" },
+  { name: "CEREC®", full: "Certified Clinic" },
   { name: "Nobel Biocare", full: "Premium Implants" },
 ];
 
@@ -26,18 +26,12 @@ const TrustedByCompanies = () => {
         <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 sm:mb-10">
           Trusted, Certified &amp; Partnered With
         </p>
-        {/* Mobile: circle layout */}
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:gap-x-14 sm:gap-y-6 pb-4 sm:pb-0">
           {brands.map((b, idx) => (
             <div key={idx} className="text-center group flex flex-col items-center">
-
-
-
-
-
-              {/* Desktop plain text */}
+              {/* Text visible on ALL screens (mobile + desktop) */}
               <p
-                className="hidden sm:block text-lg sm:text-xl font-display font-bold leading-none transition-colors duration-300"
+                className="text-base sm:text-xl font-display font-bold leading-none transition-colors duration-300"
                 style={{
                   color: idx === activeIdx ? "var(--primary)" : "rgb(156 163 175)",
                 }}
