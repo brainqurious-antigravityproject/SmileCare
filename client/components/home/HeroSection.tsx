@@ -32,27 +32,77 @@ const HeroSection = () => {
             Experience world-class dental care with state-of-the-art technology and a team dedicated to your comfort and smile.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link 
-              href="/booking" 
+            <Link
+              href="/booking"
               className="bg-primary text-white active:scale-95 active:opacity-90 px-6 sm:px-8 py-4 rounded-full font-bold text-base sm:text-lg hover:bg-white hover:text-primary transition-all duration-300 text-center shadow-lg shadow-primary/20"
             >
               Book Appointment
             </Link>
-            <Link 
-              href="/treatments" 
+            <Link
+              href="/treatments"
               className="bg-transparent border-2 border-accent-gold text-accent-gold active:scale-95 active:opacity-90 px-6 sm:px-8 py-4 rounded-full font-bold text-base sm:text-lg hover:bg-accent-gold hover:text-white transition-all duration-300 text-center"
             >
               Our Services
             </Link>
-        
-      
-    
-            
           </div>
         </div>
       </div>
+
+      <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-6 max-w-md">
+        <Stat label="Happy Customers" value={10000} suffix="+" />
+        <Stat label="Star Rating" value={4.9} decimals={1} suffix="/5" />
+        <Stat label="Experience" value={15} suffix="+ Years" />
+      </div>
+
+
     </section>
   );
 };
+
+function Stat({
+  label,
+  value,
+  suffix = "",
+  decimals = 0,
+  durationMs = 900,
+}: {
+  label: string;
+  value: number;
+  suffix?: string;
+  decimals?: number;
+  durationMs?: number;
+}) {
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / durationMs);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(value * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [value, durationMs]);
+
+  const text = decimals > 0 ? n.toFixed(decimals) : Math.round(n).toString();
+
+  return (
+    <div className="text-left sm:text-left bg-white/5 rounded-xl px-3 py-2">
+      <p className="text-white font-display font-bold text-base sm:text-lg leading-none">
+        {text}
+        {suffix}
+      </p>
+      <p className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-200/70 mt-1">
+        {label}
+      </p>
+    </div>
+  );
+}
+
 
 export default HeroSection;

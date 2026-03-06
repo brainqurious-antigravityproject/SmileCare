@@ -86,22 +86,35 @@ function DoctorModal({ doctor, onClose }: { doctor: Doctor; onClose: () => void 
 
                 <div className="p-4 sm:p-8 space-y-6">
                     {/* Stats */}
-                    <div className="flex gap-4 sm:p-8 p-5 bg-background-light rounded-2xl">
-                        <div className="text-center flex-1">
-                            <p className="text-2xl font-bold text-navy-deep">{doctor.stats.cases}</p>
-                            <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Cases</p>
+                    <div className="grid grid-cols-3 gap-3 p-4 sm:p-5 bg-background-light rounded-2xl">
+                        <div className="text-center min-w-0">
+                            <p className="text-sm sm:text-2xl font-bold text-navy-deep leading-none truncate">
+                                {doctor.stats.cases}
+                            </p>
+                            <p className="text-[10px] sm:text-xs uppercase font-bold text-gray-400 tracking-wider mt-1">
+                                Cases
+                            </p>
                         </div>
-                        <div className="w-px bg-gray-200" />
-                        <div className="text-center flex-1">
-                            <p className="text-2xl font-bold text-navy-deep">{doctor.stats.exp}</p>
-                            <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Experience</p>
+
+                        <div className="text-center min-w-0">
+                            <p className="text-sm sm:text-2xl font-bold text-navy-deep leading-none truncate">
+                                {doctor.stats.exp}
+                            </p>
+                            <p className="text-[10px] sm:text-xs uppercase font-bold text-gray-400 tracking-wider mt-1">
+                                Experience
+                            </p>
                         </div>
-                        <div className="w-px bg-gray-200" />
-                        <div className="text-center flex-1">
-                            <p className="text-sm font-bold text-navy-deep">{doctor.availableDays}</p>
-                            <p className="text-xs uppercase font-bold text-gray-400 tracking-wider">Available</p>
+
+                        <div className="text-center min-w-0">
+                            <p className="text-sm sm:text-sm font-bold text-navy-deep leading-none truncate">
+                                {doctor.availableDays}
+                            </p>
+                            <p className="text-[10px] sm:text-xs uppercase font-bold text-gray-400 tracking-wider mt-1">
+                                Available
+                            </p>
                         </div>
                     </div>
+
 
                     {/* Bio */}
                     <div>

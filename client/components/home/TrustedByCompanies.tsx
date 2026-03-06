@@ -27,26 +27,13 @@ const TrustedByCompanies = () => {
           Trusted, Certified &amp; Partnered With
         </p>
         {/* Mobile: circle layout */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-x-14 sm:gap-y-6">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:gap-x-14 sm:gap-y-6 pb-4 sm:pb-0">
           {brands.map((b, idx) => (
             <div key={idx} className="text-center group flex flex-col items-center">
-              {/* Circle avatar for mobile, hidden on sm+ */}
-              <div
-                className={`sm:hidden w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-500 mb-1 ${
-                  idx === activeIdx
-                    ? "border-primary bg-primary/10 scale-110 shadow-md shadow-primary/20"
-                    : "border-gray-200 bg-white"
-                }`}
-              >
-                <span
-                  className="text-xs font-display font-bold leading-none transition-colors duration-300"
-                  style={{
-                    color: idx === activeIdx ? "var(--primary)" : "rgb(156 163 175)",
-                  }}
-                >
-                  {b.name}
-                </span>
-              </div>
+
+
+
+
               {/* Desktop plain text */}
               <p
                 className="hidden sm:block text-lg sm:text-xl font-display font-bold leading-none transition-colors duration-300"
