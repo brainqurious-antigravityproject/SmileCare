@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 const reasons = [
     {
         icon: "verified",
@@ -31,6 +35,41 @@ const reasons = [
     },
 ];
 
+function TrustCard({ r }: { r: typeof reasons[0] }) {
+    const [touched, setTouched] = useState(false);
+    return (
+        <div
+            className={`group bg-background-light rounded-3xl p-4 sm:p-8 transition-all duration-500 cursor-default touch-manipulation ${
+                touched
+                    ? "bg-primary shadow-2xl shadow-primary/20 scale-[1.02]"
+                    : "hover:bg-primary hover:shadow-2xl hover:shadow-primary/20"
+            }`}
+            onTouchStart={() => setTouched(true)}
+            onTouchEnd={() => setTimeout(() => setTouched(false), 600)}
+        >
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors ${
+                touched ? "bg-white/20" : "bg-primary/10 group-hover:bg-white/20"
+            }`}>
+                <span className={`material-symbols-outlined text-2xl transition-colors ${
+                    touched ? "text-white" : "text-primary group-hover:text-white"
+                }`}>
+                    {r.icon}
+                </span>
+            </div>
+            <h3 className={`text-xl font-display font-bold mb-3 transition-colors ${
+                touched ? "text-white" : "text-navy-deep group-hover:text-white"
+            }`}>
+                {r.title}
+            </h3>
+            <p className={`leading-relaxed transition-colors ${
+                touched ? "text-white/80" : "text-gray-500 group-hover:text-white/80"
+            }`}>
+                {r.description}
+            </p>
+        </div>
+    );
+}
+
 const WhyTrustUs = () => {
     return (
         <section className="py-24 bg-white">
@@ -50,22 +89,7 @@ const WhyTrustUs = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:p-8">
                     {reasons.map((r, idx) => (
-                        <div
-                            key={idx}
-                            className="group bg-background-light rounded-3xl p-4 sm:p-8 hover:bg-primary hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 cursor-default"
-                        >
-                            <div className="w-14 h-14 rounded-2xl bg-primary/10 group-hover:bg-white/20 flex items-center justify-center mb-6 transition-colors">
-                                <span className="material-symbols-outlined text-primary group-hover:text-white text-2xl transition-colors">
-                                    {r.icon}
-                                </span>
-                            </div>
-                            <h3 className="text-xl font-display font-bold text-navy-deep group-hover:text-white mb-3 transition-colors">
-                                {r.title}
-                            </h3>
-                            <p className="text-gray-500 group-hover:text-white/80 leading-relaxed transition-colors">
-                                {r.description}
-                            </p>
-                        </div>
+                        <TrustCard key={idx} r={r} />
                     ))}
                 </div>
             </div>

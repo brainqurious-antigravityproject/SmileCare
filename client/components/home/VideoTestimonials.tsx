@@ -52,36 +52,36 @@ const VideoTestimonials = () => {
 
                 <div className="lg:grid lg:grid-cols-2 gap-16 items-center">
                     {/* Active testimonial */}
-                    <div className="relative rounded-[2rem] overflow-hidden bg-white/5 border border-white/10 p-10 mb-10 lg:mb-0">
+                    <div className="relative rounded-[2rem] overflow-hidden bg-white/5 border border-white/10 p-6 sm:p-10 mb-10 lg:mb-0">
                         <div className="flex items-center gap-5 mb-8">
-                            <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-accent-gold/30">
+                            <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-accent-gold/30 shrink-0">
                                 <Image src={current.image} alt={current.name} fill className="object-cover" />
                             </div>
-                            <div>
-                                <h4 className="font-bold text-lg">{current.name}</h4>
-                                <p className="text-accent-gold text-xs font-bold uppercase tracking-widest">{current.treatment}</p>
+                            <div className="min-w-0">
+                                <h4 className="font-bold text-lg truncate">{current.name}</h4>
+                                <p className="text-accent-gold text-xs font-bold uppercase tracking-widest truncate">{current.treatment}</p>
                             </div>
-                            <div className="ml-auto flex gap-0.5">
+                            <div className="ml-auto flex gap-0.5 shrink-0">
                                 {Array.from({ length: current.rating }).map((_, i) => (
-                                    <span key={i} className="text-accent-gold text-lg">★</span>
+                                    <span key={i} className="text-accent-gold text-base">★</span>
                                 ))}
                             </div>
                         </div>
 
-                        <blockquote className="text-xl text-white/90 leading-relaxed italic mb-8 relative">
+                        <blockquote className="text-base sm:text-xl text-white/90 leading-relaxed italic mb-8 relative">
                             <span className="absolute -top-4 -left-2 text-6xl text-accent-gold/20 font-serif leading-none">"</span>
                             {current.quote}
                         </blockquote>
 
-                        <div className="flex gap-4 sm:p-8 pt-6 border-t border-white/10">
-                            <div>
-                                <p className="text-2xl font-bold text-accent-gold">{current.duration}</p>
-                                <p className="text-xs uppercase font-bold text-white/40 tracking-wider">Treatment Time</p>
+                        <div className="flex gap-4 pt-6 border-t border-white/10 min-w-0">
+                            <div className="min-w-0 flex-1">
+                                <p className="text-lg sm:text-2xl font-bold text-accent-gold truncate">{current.duration}</p>
+                                <p className="text-[10px] sm:text-xs uppercase font-bold text-white/40 tracking-wider">Treatment Time</p>
                             </div>
-                            <div className="w-px bg-white/10" />
-                            <div>
-                                <p className="text-2xl font-bold text-accent-gold">{current.result}</p>
-                                <p className="text-xs uppercase font-bold text-white/40 tracking-wider">Outcome</p>
+                            <div className="w-px bg-white/10 shrink-0" />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-lg sm:text-2xl font-bold text-accent-gold truncate">{current.result}</p>
+                                <p className="text-[10px] sm:text-xs uppercase font-bold text-white/40 tracking-wider">Outcome</p>
                             </div>
                         </div>
                     </div>
@@ -92,10 +92,11 @@ const VideoTestimonials = () => {
                             <button
                                 key={idx}
                                 onClick={() => setActive(idx)}
-                                className={`w-full flex items-center gap-5 p-5 rounded-2xl border transition-all duration-300 text-left ${active === idx
+                                className={`w-full flex items-center gap-5 p-5 rounded-2xl border transition-all duration-300 text-left touch-manipulation ${
+                                    active === idx
                                         ? "bg-white/10 border-accent-gold/50 scale-[1.02]"
-                                        : "bg-white/5 border-white/10 hover:bg-white/8"
-                                    }`}
+                                        : "bg-white/5 border-white/10 hover:bg-white/8 active:bg-white/10 active:scale-[1.02]"
+                                }`}
                             >
                                 <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0">
                                     <Image src={t.image} alt={t.name} fill className="object-cover" />

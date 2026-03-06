@@ -38,7 +38,7 @@ const TestimonialsSection = () => {
                                     </div>
                                     <p className="text-gray-600 italic leading-relaxed">"{testimonial.text}"</p>
                                     <div className="flex items-center gap-4 mt-2">
-                                        <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden relative">
+                                        <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
                                             <Image
                                                 src={`https://i.pravatar.cc/150?u=${testimonial.name}`}
                                                 alt={testimonial.name}
@@ -57,7 +57,7 @@ const TestimonialsSection = () => {
                     </div>
 
                     {/* Right: Video Placeholder / Illustration */}
-                    <div className="flex-1 order-1 lg:order-2">
+                    <div className="flex-1 order-1 lg:order-2 w-full">
                         <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
                             <Image
                                 src="https://images.unsplash.com/photo-1527613473219-446a7238c355?auto=format&fit=crop&q=80&w=1200"
@@ -78,20 +78,21 @@ const TestimonialsSection = () => {
                             </div>
                         </div>
 
-                        <div className="mt-8 flex items-center justify-center gap-12 text-center text-gray-400">
+                        {/* Stats row — padded on mobile to prevent edge touching */}
+                        <div className="mt-8 mx-4 sm:mx-0 flex items-center justify-center gap-6 sm:gap-12 text-center text-gray-400 bg-gray-50 sm:bg-transparent rounded-2xl sm:rounded-none py-4 sm:py-0 px-4 sm:px-0">
                             <div>
-                                <p className="text-2xl font-bold text-navy-deep">500+</p>
-                                <p className="text-xs uppercase tracking-widest">Video Reviews</p>
+                                <p className="text-xl sm:text-2xl font-bold text-navy-deep">500+</p>
+                                <p className="text-[10px] sm:text-xs uppercase tracking-widest">Video Reviews</p>
                             </div>
-                            <div className="w-px h-8 bg-gray-100" />
+                            <div className="w-px h-8 bg-gray-200" />
                             <div>
-                                <p className="text-2xl font-bold text-navy-deep">4.9/5</p>
-                                <p className="text-xs uppercase tracking-widest">Google Rating</p>
+                                <p className="text-xl sm:text-2xl font-bold text-navy-deep">4.9/5</p>
+                                <p className="text-[10px] sm:text-xs uppercase tracking-widest">Google Rating</p>
                             </div>
-                            <div className="w-px h-8 bg-gray-100" />
+                            <div className="w-px h-8 bg-gray-200" />
                             <div>
-                                <p className="text-2xl font-bold text-navy-deep">98%</p>
-                                <p className="text-xs uppercase tracking-widest">Success Rate</p>
+                                <p className="text-xl sm:text-2xl font-bold text-navy-deep">98%</p>
+                                <p className="text-[10px] sm:text-xs uppercase tracking-widest">Success Rate</p>
                             </div>
                         </div>
                     </div>

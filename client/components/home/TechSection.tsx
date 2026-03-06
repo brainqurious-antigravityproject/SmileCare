@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 const TechSection = () => {
     const features = [
@@ -15,11 +18,12 @@ const TechSection = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-4 sm:px-8">
                 <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
                     {/* Image Column */}
-                    <div className="flex-1 relative">
+                    <div className="flex-1 relative w-full">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-accent-gold/10 rounded-full blur-3xl z-0" />
                         <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl z-0" />
 
-                        <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl skew-y-1 hover:skew-y-0 transition-transform duration-700">
+                        {/* Touch/hover interaction on image container */}
+                        <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl skew-y-1 hover:skew-y-0 active:skew-y-0 transition-transform duration-700 touch-manipulation">
                             <Image
                                 src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=1000"
                                 alt="Advanced Dental Technology"
@@ -59,14 +63,7 @@ const TechSection = () => {
 
                         <ul className="grid grid-cols-1 gap-4">
                             {features.map((feature, idx) => (
-                                <li key={idx} className="flex items-center gap-4 group">
-                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
-                                        <svg className="w-3.5 h-3.5 text-primary group-hover:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-navy-deep font-medium group-hover:translate-x-1 transition-transform">{feature}</span>
-                                </li>
+                                <FeatureItem key={idx} feature={feature} />
                             ))}
                         </ul>
 
@@ -84,5 +81,32 @@ const TechSection = () => {
         </section>
     );
 };
+
+// Touch + hover interactive feature item
+function FeatureItem({ feature }: { feature: string }) {
+    const [touched, setTouched] = useState(false);
+    return (
+        <li
+            className={`flex items-center gap-4 group touch-manipulation cursor-pointer select-none ${
+                touched ? "translate-x-1" : ""
+            } transition-transform duration-200`}
+            onTouchStart={() => setTouched(true)}
+            onTouchEnd={() => setTimeout(() => setTouched(false), 300)}
+        >
+            <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+                touched ? "bg-primary" : "bg-primary/10 group-hover:bg-primary"
+            }`}>
+                <svg className={`w-3.5 h-3.5 transition-colors ${
+                    touched ? "text-white" : "text-primary group-hover:text-white"
+                }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <span className={`font-medium transition-transform ${
+                touched ? "translate-x-1 text-primary" : "text-navy-deep group-hover:translate-x-1"
+            }`}>{feature}</span>
+        </li>
+    );
+}
 
 export default TechSection;

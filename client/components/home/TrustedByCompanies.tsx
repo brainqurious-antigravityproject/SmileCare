@@ -26,21 +26,37 @@ const TrustedByCompanies = () => {
         <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-8 sm:mb-10">
           Trusted, Certified &amp; Partnered With
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 sm:gap-x-14">
+        {/* Mobile: circle layout */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-x-14 sm:gap-y-6">
           {brands.map((b, idx) => (
-            <div key={idx} className="text-center group">
+            <div key={idx} className="text-center group flex flex-col items-center">
+              {/* Circle avatar for mobile, hidden on sm+ */}
+              <div
+                className={`sm:hidden w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-500 mb-1 ${
+                  idx === activeIdx
+                    ? "border-primary bg-primary/10 scale-110 shadow-md shadow-primary/20"
+                    : "border-gray-200 bg-white"
+                }`}
+              >
+                <span
+                  className="text-xs font-display font-bold leading-none transition-colors duration-300"
+                  style={{
+                    color: idx === activeIdx ? "var(--primary)" : "rgb(156 163 175)",
+                  }}
+                >
+                  {b.name}
+                </span>
+              </div>
+              {/* Desktop plain text */}
               <p
-                className="text-lg sm:text-xl font-display font-bold leading-none transition-colors duration-300"
+                className="hidden sm:block text-lg sm:text-xl font-display font-bold leading-none transition-colors duration-300"
                 style={{
-                  color:
-                    idx === activeIdx
-                      ? "var(--primary)"
-                      : "rgb(156 163 175)",
+                  color: idx === activeIdx ? "var(--primary)" : "rgb(156 163 175)",
                 }}
               >
                 {b.name}
               </p>
-              <p className="text-[10px] font-bold text-gray-300 uppercase tracking-wider mt-1">
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-300 uppercase tracking-wider mt-1">
                 {b.full}
               </p>
             </div>

@@ -96,7 +96,6 @@ export default function ChatWidget() {
   // -- Scroll Trigger for Auto-Popup -------------------------
   useEffect(() => {
     const handleScroll = () => {
-      // If user scrolled more than 400px and hasn't opened chat yet
       if (window.scrollY > 400 && !isOpen && !hasAutoOpened) {
         setIsOpen(true);
         setHasAutoOpened(true);
@@ -124,7 +123,6 @@ export default function ChatWidget() {
       setInputValue("");
       setIsLoading(true);
 
-      // Build history for API (exclude welcome, keep last 6 turns)
       const history = messages
         .filter((m) => m.id !== "welcome")
         .slice(-6)
@@ -222,7 +220,7 @@ export default function ChatWidget() {
               />
             ))}
 
-            {/* Quick replies \u2014 show only after welcome */}
+            {/* Quick replies - show only after welcome */}
             {messages.length === 1 && !isLoading && (
               <div className="flex flex-wrap gap-2 ml-9">
                 {QUICK_REPLIES.map((qr) => (
@@ -265,8 +263,7 @@ export default function ChatWidget() {
                 className="flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:border-primary/40 focus:bg-white transition-colors min-h-[40px] max-h-[100px] disabled:opacity-50 no-scrollbar"
                 style={{
                   height: "auto",
-                  overflowY: inputValue.split("
-").length > 3 ? "auto" : "hidden",
+                  overflowY: inputValue.split("\n").length > 3 ? "auto" : "hidden",
                 }}
                 onInput={(e) => {
                   const t = e.currentTarget;

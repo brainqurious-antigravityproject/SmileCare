@@ -82,8 +82,26 @@ const Header = () => {
                         )}
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <div className="md:hidden flex items-center">
+                    {/* Mobile: Book Appointment button + Hamburger */}
+                    <div className="md:hidden flex items-center gap-2">
+                        {/* Book Appointment button outside drawer */}
+                        {!isAuthenticated && (
+                            <Link
+                                href="/booking"
+                                className="bg-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md active:scale-95 transition-all whitespace-nowrap"
+                            >
+                                Book Appt
+                            </Link>
+                        )}
+                        {isAuthenticated && (
+                            <Link
+                                href="/dashboard"
+                                className="text-primary text-xs font-bold px-3 py-1.5 rounded-full border border-primary/20 active:scale-95 transition-all whitespace-nowrap"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Dashboard
+                            </Link>
+                        )}
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="text-navy-deep p-2"
@@ -133,13 +151,6 @@ const Header = () => {
 
                         {isAuthenticated ? (
                             <>
-                                <Link
-                                    href="/dashboard"
-                                    className="block px-3 py-2 text-primary font-semibold"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Dashboard
-                                </Link>
                                 <button
                                     onClick={() => {
                                         setIsMenuOpen(false);
@@ -158,13 +169,6 @@ const Header = () => {
                                     onClick={() => setIsMenuOpen(false)}
                                 >
                                     Login
-                                </Link>
-                                <Link
-                                    href="/booking"
-                                    className="block px-3 py-3 mt-4 bg-primary text-white text-center rounded-lg font-semibold"
-                                    onClick={() => setIsMenuOpen(false)}
-                                >
-                                    Book Appointment
                                 </Link>
                             </>
                         )}

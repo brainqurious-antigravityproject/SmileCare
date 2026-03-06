@@ -34,7 +34,6 @@ const BookingBar = () => {
         router.push("/booking" + (params.toString() ? "?" + params.toString() : ""));
     };
 
-    // Min date = today
     const today = new Date().toISOString().split("T")[0];
 
     return (
@@ -113,12 +112,7 @@ const BookingBar = () => {
                     </button>
                 </div>
             </div>
-
-            <p className="text-center text-sm text-gray-500 mt-4">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse" />
-                Next available slot:{" "}
-                <span className="font-bold text-navy-deep">Today, 2:30 PM</span>
-            </p>
+            {/* Removed: Next available slot text */}
         </div>
     );
 };
