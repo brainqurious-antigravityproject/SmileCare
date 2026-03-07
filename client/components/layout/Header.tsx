@@ -89,7 +89,7 @@ const Header = () => {
                            <Link
   href="/booking"
   className="
-    bg-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md
+    bg-primary text-white px-3 py-2 rounded-full text-xs font-bold shadow-md
     transition-all whitespace-nowrap
     hover:opacity-90 hover:-translate-y-0.5 hover:shadow-lg
     active:scale-95 active:opacity-90
