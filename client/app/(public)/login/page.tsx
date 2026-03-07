@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { LogIn, Loader2, Eye, EyeOff } from "lucide-react";
+import { LogIn, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -11,8 +11,10 @@ function LoginForm() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const prefillEmail = searchParams.get("email") || "";
+  const justRegistered = searchParams.get("registered") === "1";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +30,6 @@ function LoginForm() {
       await login(email, password, redirectTo);
     } catch (err: any) {
       const msg: string = err.message || "";
-      // Detect "no account" type errors from backend
       if (
         msg.toLowerCase().includes("not found") ||
         msg.toLowerCase().includes("no account") ||
@@ -60,8 +61,19 @@ function LoginForm() {
         <h1 className="text-2xl font-display font-bold text-primary mb-1">Welcome Back</h1>
         <p className="text-slate-500 text-sm mb-6">Premium dental experience awaits.</p>
 
+        {/* Registration success banner */}
+        {justRegistered && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-start gap-3">
+            <CheckCircle2 size={18} className="text-green-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-green-700">Account created successfully!</p>
+              <p className="text-xs text-green-600 mt-0.5">Please sign in with your credentials to continue.</p>
+            </div>
+          </div>
+        )}
+
         {/* Context message for payment redirect */}
-        {redirectTo === "/payment" && (
+        {redirectTo.startsWith("/payment") && (
           <div className="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-xl text-sm text-primary font-medium">
             🔒 Please sign in to complete your payment
           </div>
@@ -95,7 +107,7 @@ function LoginForm() {
         <div className="flex flex-col gap-3 mb-6">
           <a
             href="#"
-            onClick={(e) => { e.preventDefault(); alert("Google login coming soon — set up NEXT_PUBLIC_GOOGLE_CLIENT_ID in your env."); }}
+            onClick={(e) => { e.preventDefault(); alert("Google login coming soon — configure NEXT_PUBLIC_GOOGLE_CLIENT_ID in your env."); }}
             className="flex items-center justify-center gap-3 w-full border border-slate-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -108,7 +120,7 @@ function LoginForm() {
           </a>
           <a
             href="#"
-            onClick={(e) => { e.preventDefault(); alert("Apple login coming soon — set up Apple OAuth credentials."); }}
+            onClick={(e) => { e.preventDefault(); alert("Apple login coming soon — configure Apple OAuth credentials."); }}
             className="flex items-center justify-center gap-3 w-full border border-slate-200 rounded-xl py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -133,6 +145,7 @@ function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoFocus={!!prefillEmail}
               className="w-full border border-primary/20 rounded-xl px-4 py-3 bg-white text-primary font-medium focus:ring-2 focus:ring-primary/40 outline-none transition-all placeholder:text-primary/30"
               placeholder="alex@smilecare.com"
             />
@@ -145,6 +158,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoFocus={!prefillEmail}
                 className="w-full border border-primary/20 rounded-xl px-4 py-3 pr-12 bg-white text-primary font-medium focus:ring-2 focus:ring-primary/40 outline-none transition-all placeholder:text-primary/30"
                 placeholder="••••••••"
               />
