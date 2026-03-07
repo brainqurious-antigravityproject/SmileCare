@@ -12,7 +12,7 @@ const TreatmentsNewsletter = () => {
     };
 
     return (
-        <section className="py-20 bg-primary relative overflow-hidden rounded-xl">
+        <section className="py-20 mt-10 bg-primary relative overflow-hidden rounded-5xl md:rounded-[3rem]">
             {/* Decorative blurred circles */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-gold/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
