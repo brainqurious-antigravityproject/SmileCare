@@ -238,7 +238,7 @@ export default function ChatWidget() {
                       <span className="font-semibold">Emergency Detected</span>
                     </div>
                   )}
-                  // ✅ AFTER (works with react-markdown v9+)
+                  
 <div className="prose prose-sm max-w-none">
   <ReactMarkdown
     components={{
