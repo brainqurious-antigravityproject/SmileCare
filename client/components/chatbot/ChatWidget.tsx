@@ -114,7 +114,7 @@ export default function ChatWidget() {
       setIsLoading(true);
 
       try {
-        const res = await fetch(`${API}/api/chat`, {
+        const res = await fetch(`${API}/api/chatbot/message`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
