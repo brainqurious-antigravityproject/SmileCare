@@ -177,11 +177,11 @@ export default function DashboardPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-xl">
+                        {/* <div className="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-xl">
                             <Award size={16} className="text-accent-gold" />
                             <span className="text-xs font-bold text-primary">{profile.loyaltyPoints} pts</span>
                             <span className="text-[10px] bg-accent-gold/20 text-accent-gold px-2 py-0.5 rounded-full font-bold uppercase">{profile.membership}</span>
-                        </div>
+                        </div> */}
                         <button className="size-10 flex items-center justify-center rounded-full bg-white border border-primary/10 text-primary/90 hover:text-primary transition-colors relative">
                             <Bell size={20} />
                             {unreadCount > 0 && (
