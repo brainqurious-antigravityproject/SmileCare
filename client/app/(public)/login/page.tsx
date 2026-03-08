@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { LogIn, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +10,8 @@ import { useAuth } from "@/context/AuthContext";
 function LoginForm() {
   const { login, loginWithGoogle } = useAuth();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const prefillEmail = searchParams.get("email") || "";
   const justRegistered = searchParams.get("registered") === "1";
@@ -42,18 +44,33 @@ function LoginForm() {
     setNoAccount(false);
     setLoading(true);
     try {
-      await login(email, password, redirectTo);
-    } catch (err: unknown) {
-      const msg: string = (err instanceof Error ? err.message : "") || "";
-      if (
-        msg.toLowerCase().includes("not found") ||
-        msg.toLowerCase().includes("no account") ||
-        msg.toLowerCase().includes("does not exist") ||
-        msg.toLowerCase().includes("no user")
-      ) {
-        setNoAccount(true);
+      await login(email, password);
+
+      // Determine logical redirect
+      if (searchParams.has("redirect")) {
+        router.replace(decodeURIComponent(searchParams.get("redirect")!));
+      } else if (document.referrer.includes(window.location.origin)) {
+        try {
+          const referrerPath = new URL(document.referrer).pathname;
+          if (referrerPath === '/') {
+            router.replace('/');
+          } else {
+            router.replace('/dashboard');
+          }
+        } catch {
+          router.replace('/dashboard');
+        }
       } else {
-        setError(msg || "Login failed");
+        router.replace('/dashboard');
+      }
+
+    } catch (err: any) {
+      if (err?.type === 'USER_NOT_FOUND') {
+        setNoAccount(true);
+      } else if (err?.type === 'INVALID_CREDENTIALS') {
+        setError("Error: Incorrect password. Please try again.");
+      } else {
+        setError(err?.message || "Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -64,27 +81,33 @@ function LoginForm() {
     loginWithGoogle();
   };
 
+  // Clear specific inline errors on input changes
+  const clearErrors = () => {
+    setError("");
+    setNoAccount(false);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background-light px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <LogIn className="h-6 w-6 text-white" />
+          <div className="mx-auto h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+            <LogIn className="h-6 w-6 text-primary" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <h2 className="mt-6 text-3xl font-display font-bold text-navy-deep">Welcome back</h2>
+          <p className="mt-2 text-sm text-slate-600">
             Sign in to your SmileCare account
           </p>
         </div>
 
         {justRegistered && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start space-x-3">
-            <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+          <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 flex items-start space-x-3">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-green-800">
+              <p className="text-sm font-bold text-emerald-800">
                 Registration successful!
               </p>
-              <p className="text-sm text-green-700 mt-1">
+              <p className="text-sm text-emerald-700 mt-1">
                 Your account has been created. Please log in with your credentials.
               </p>
             </div>
@@ -96,7 +119,7 @@ function LoginForm() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-bold text-slate-700 mb-1"
               >
                 Email address
               </label>
@@ -107,8 +130,11 @@ function LoginForm() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  clearErrors();
+                }}
+                className="appearance-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary sm:text-sm transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -116,7 +142,7 @@ function LoginForm() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-bold text-slate-700 mb-1"
               >
                 Password
               </label>
@@ -128,8 +154,11 @@ function LoginForm() {
                   autoComplete="current-password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm pr-10"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    clearErrors();
+                  }}
+                  className="appearance-none relative block w-full px-3 py-2 border border-slate-300 placeholder-slate-400 text-slate-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary sm:text-sm pr-10 transition-colors"
                   placeholder="••••••••"
                 />
                 <button
@@ -138,9 +167,9 @@ function LoginForm() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPw ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-slate-400 hover:text-slate-600 transition-colors" />
                   )}
                 </button>
               </div>
@@ -154,16 +183,16 @@ function LoginForm() {
           )}
 
           {noAccount && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/register"
-                  className="font-bold underline cursor-pointer animate-pulse hover:text-blue-600 transition-colors"
-                >
-                  Create an account
-                </Link>
-              </p>
+            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-800 flex flex-wrap items-start gap-1">
+              <span>⚠️ No account found.</span>
+              <button
+                type="button"
+                onClick={() => router.push('/register')}
+                className="font-bold underline text-primary hover:no-underline transition-colors animate-pulse hover:animate-none ml-1"
+              >
+                Create an account
+              </button>
+              <span>first.</span>
             </div>
           )}
 
@@ -171,7 +200,7 @@ function LoginForm() {
             <div className="text-sm">
               <Link
                 href="/forgot-password"
-                className="font-medium text-blue-600 hover:text-blue-500"
+                className="font-medium text-primary hover:opacity-80 transition-opacity"
               >
                 Forgot your password?
               </Link>
@@ -182,7 +211,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-2.5 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-primary hover:opacity-90 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:bg-primary/50 disabled:cursor-not-allowed transition-all"
             >
               {loading ? (
                 <>
@@ -198,10 +227,10 @@ function LoginForm() {
           {/* OAuth Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-slate-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              <span className="px-2 bg-white text-slate-500 font-medium">Or continue with</span>
             </div>
           </div>
 
@@ -210,7 +239,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-slate-300 rounded-lg shadow-sm bg-white text-sm font-bold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                 <path
@@ -236,11 +265,11 @@ function LoginForm() {
         </form>
 
         <div className="text-center">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600 font-medium">
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              className="font-bold text-primary hover:opacity-80 transition-opacity"
             >
               Sign up
             </Link>
@@ -255,8 +284,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <div className="min-h-screen flex items-center justify-center bg-background-light">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       }
     >

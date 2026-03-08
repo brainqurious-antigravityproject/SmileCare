@@ -73,21 +73,10 @@ export default function PatientDetailsStep({
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    
-    // Always ensure +91 prefix
-    if (!value.startsWith("+91")) {
-      value = "+91 " + value.replace(/^\+91\s*/, "");
-    }
-    
-    // Ensure space after +91
-    if (value === "+91" || value === "+91 ") {
-      value = "+91 ";
-    } else if (value.length > 3 && value[3] !== " ") {
-      value = "+91 " + value.substring(3);
-    }
-    
-    setForm((p) => ({ ...p, phone: value }));
+    const rawValue = e.target.value;
+    // Strip the starting +91 (with or without space), then remove non-digits, and cap at 10 to ensure we only accept 10 digits
+    const stripped = rawValue.replace(/^\+91\s*/, '').replace(/\D/g, '').slice(0, 10);
+    setForm((p) => ({ ...p, phone: `+91 ${stripped}` }));
   };
 
   const base =
@@ -125,9 +114,8 @@ export default function PatientDetailsStep({
               }
               placeholder="Your full name"
               autoComplete="name"
-              className={`${base} ${
-                errors.name ? "border-red-300" : "border-slate-200"
-              }`}
+              className={`${base} ${errors.name ? "border-red-300" : "border-slate-200"
+                }`}
             />
             {errors.name && (
               <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
@@ -146,11 +134,11 @@ export default function PatientDetailsStep({
               type="tel"
               value={form.phone}
               onChange={handlePhoneChange}
+              maxLength={14}
               placeholder="+91 9876543210"
               autoComplete="tel"
-              className={`${base} ${
-                errors.phone ? "border-red-300" : "border-slate-200"
-              }`}
+              className={`${base} ${errors.phone ? "border-red-300" : "border-slate-200"
+                }`}
             />
             {errors.phone && (
               <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">
@@ -173,9 +161,8 @@ export default function PatientDetailsStep({
               }
               placeholder="you@example.com"
               autoComplete="email"
-              className={`${base} ${
-                errors.email ? "border-red-300" : "border-slate-200"
-              }`}
+              className={`${base} ${errors.email ? "border-red-300" : "border-slate-200"
+                }`}
             />
             {errors.email && (
               <p className="mt-1.5 text-xs text-red-600 flex items-center gap-1">

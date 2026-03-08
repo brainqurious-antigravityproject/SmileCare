@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function AuthCallbackPage() {
     const router = useRouter();
+    const { refreshUser } = useAuth();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -84,8 +86,6 @@ export default function AuthCallbackPage() {
                                 }),
                             });
 
-                            // Even if login fails with generated password, the user is created
-                            // in Supabase — they can use "forgot password" or Google OAuth next time
                             if (!loginRes.ok) {
                                 console.warn("OAuth user created but backend login sync may need manual setup");
                             }
@@ -95,8 +95,16 @@ export default function AuthCallbackPage() {
                     }
                 }
 
-                // Redirect to dashboard or stored redirect target
-                router.push("/dashboard");
+                // Call refreshUser to populate the AuthContext state immediately
+                await refreshUser();
+
+                // Redirect logic
+                const pendingBooking = sessionStorage.getItem('pendingBooking');
+                if (pendingBooking) {
+                    router.replace("/booking");
+                } else {
+                    router.replace("/dashboard");
+                }
             } catch (err) {
                 console.error("Auth callback error:", err);
                 setError("Authentication failed. Redirecting to login...");
@@ -105,13 +113,16 @@ export default function AuthCallbackPage() {
         };
 
         handleCallback();
-    }, [router]);
+    }, [router, refreshUser]);
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background-light">
-                <div className="text-center space-y-4">
-                    <p className="text-red-600 font-medium">{error}</p>
+            <div className="min-h-screen flex items-center justify-center bg-background-light px-4">
+                <div className="text-center space-y-4 max-w-sm w-full bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                    <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <span className="text-red-600 text-xl font-bold">!</span>
+                    </div>
+                    <p className="text-red-700 font-medium">{error}</p>
                     <p className="text-sm text-slate-500">Redirecting to login...</p>
                 </div>
             </div>
@@ -121,8 +132,8 @@ export default function AuthCallbackPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-background-light">
             <div className="text-center space-y-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                <p className="text-sm text-slate-600 font-medium">Completing sign-in...</p>
+                <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+                <p className="text-base text-slate-600 font-medium animate-pulse">Completing sign-in...</p>
             </div>
         </div>
     );

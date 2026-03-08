@@ -19,7 +19,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, phone: string, password: string) => Promise<{ success: boolean; email?: string; password?: string }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<User | null>;
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const login = async (email: string, password: string, redirectTo?: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const res = await fetch(`${API}/api/auth/login`, {
         method: "POST",
@@ -72,58 +72,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (!res.ok) {
-        const msg = data.message || data.error || "Login failed";
+        const msg = (data.message || data.error || "Login failed").toLowerCase();
 
-        // Check if error is "User not found" - prompt to create account
-        if (msg.toLowerCase().includes("user not found") || msg.toLowerCase().includes("no user") || msg.toLowerCase().includes("does not exist")) {
-          toastError(
-            <div>
-              User not found. Please{" "}
-              <span
-                onClick={() => router.push('/register')}
-                className="underline cursor-pointer font-bold animate-pulse hover:text-blue-400"
-              >
-                create an account
-              </span>{" "}
-              first.
-            </div>
-          );
-        } else {
-          toastError(msg);
+        if (msg.includes("not found") || msg.includes("no user") || msg.includes("does not exist") || msg.includes("invalid") || msg.includes("incorrect")) {
+          if (msg.includes("not found") || msg.includes("no user") || msg.includes("does not exist")) {
+            throw { type: 'USER_NOT_FOUND', message: msg };
+          } else {
+            throw { type: 'INVALID_CREDENTIALS', message: 'Incorrect password. Please try again.' };
+          }
         }
         throw new Error(msg);
       }
 
       setUser(data.user);
-      success("Login successful!");
 
       // Clear any pre-fill credentials
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('smilecare_prefill');
       }
 
-      // Handle redirect logic
-      if (redirectTo && redirectTo !== '/dashboard') {
-        router.push(redirectTo);
-      } else if (typeof window !== 'undefined') {
-        // Check if user came from homepage
-        try {
-          const ref = document.referrer;
-          if (ref) {
-            const refUrl = new URL(ref);
-            if (refUrl.origin === window.location.origin && refUrl.pathname === '/') {
-              router.push('/');
-              return;
-            }
-          }
-        } catch { /* ignore invalid referrer */ }
-        router.push(redirectTo || "/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
     } catch (err: unknown) {
       console.error("Login error:", err);
-      // Error already shown in toast above
+      // Throw the error so the page can handle it
+      throw err;
     }
   };
 
@@ -184,17 +155,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          }
         },
       });
-      if (error) {
-        throw error;
-      }
-    } catch (err) {
+      if (error) throw error;
+    } catch (err: unknown) {
       console.error("Google login error:", err);
-      toastError("Google login failed. Please try again.");
+      toastError("Google sign-in failed. Please try again.");
     }
   };
 

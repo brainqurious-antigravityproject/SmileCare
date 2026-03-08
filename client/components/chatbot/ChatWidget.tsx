@@ -182,7 +182,7 @@ export default function ChatWidget() {
       {/* Floating chat button */}
       <button
         onClick={handleToggleChat}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-teal-600 text-white shadow-lg transition-all hover:scale-110 hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-300"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-all hover:scale-110 hover:opacity-90 focus:outline-none focus:ring-4 focus:ring-primary/30"
         aria-label="Toggle chat"
       >
         {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
@@ -197,17 +197,20 @@ export default function ChatWidget() {
       {isOpen && (
         <div className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[400px] flex-col rounded-2xl bg-white shadow-2xl">
           {/* Header */}
-          <div className="flex items-center justify-between rounded-t-2xl bg-gradient-to-r from-teal-600 to-teal-500 px-5 py-4 text-white">
+          <div
+            className="flex items-center justify-between rounded-t-2xl px-5 py-4 text-white"
+            style={{ background: 'var(--primary)' }}
+          >
             <div className="flex items-center gap-3">
               <Bot size={24} />
               <div>
                 <h3 className="font-semibold">SmileCare Assistant</h3>
-                <p className="text-xs text-teal-100">Always here to help</p>
+                <p className="text-xs text-white/70">Always here to help</p>
               </div>
             </div>
             <button
               onClick={handleToggleChat}
-              className="rounded-full p-1 transition-colors hover:bg-teal-700"
+              className="rounded-full p-1 transition-colors hover:bg-white/20"
               aria-label="Close chat"
             >
               <X size={20} />
@@ -223,14 +226,14 @@ export default function ChatWidget() {
                   }`}
               >
                 {msg.role === "assistant" && (
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
-                    <Bot size={16} className="text-teal-600" />
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                    <Bot size={16} className="text-primary" />
                   </div>
                 )}
                 <div
                   className={`max-w-[75%] rounded-2xl px-4 py-3 ${msg.role === "user"
-                      ? "bg-teal-600 text-white"
-                      : "bg-gray-100 text-gray-900"
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-gray-900"
                     }`}
                 >
                   {msg.isEmergency && (
@@ -259,8 +262,8 @@ export default function ChatWidget() {
                     <button
                       onClick={() => handleCTAClick(msg.cta!.href)}
                       className={`mt-3 flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${msg.cta.variant === "primary"
-                          ? "bg-teal-600 text-white hover:bg-teal-700"
-                          : "border border-teal-600 text-teal-600 hover:bg-teal-50"
+                        ? "bg-primary text-white hover:opacity-90"
+                        : "border border-primary text-primary hover:bg-primary/5"
                         }`}
                     >
                       <span>{msg.cta.label}</span>
@@ -269,7 +272,7 @@ export default function ChatWidget() {
                   )}
                 </div>
                 {msg.role === "user" && (
-                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-600">
+                  <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary">
                     <User size={16} className="text-white" />
                   </div>
                 )}
@@ -283,7 +286,7 @@ export default function ChatWidget() {
                   <button
                     key={reply}
                     onClick={() => handleQuickReply(reply)}
-                    className="rounded-full border border-teal-600 px-4 py-2 text-sm text-teal-600 transition-colors hover:bg-teal-50"
+                    className="rounded-full border border-primary px-4 py-2 text-sm text-primary transition-colors hover:bg-primary/5"
                   >
                     {reply}
                   </button>
@@ -294,11 +297,11 @@ export default function ChatWidget() {
             {/* Loading indicator */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
-                  <Bot size={16} className="text-teal-600" />
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                  <Bot size={16} className="text-primary" />
                 </div>
                 <div className="flex items-center gap-2 rounded-2xl bg-gray-100 px-4 py-3">
-                  <Loader2 size={16} className="animate-spin text-teal-600" />
+                  <Loader2 size={16} className="animate-spin text-primary" />
                   <span className="text-sm text-gray-600">Thinking...</span>
                 </div>
               </div>
@@ -316,12 +319,12 @@ export default function ChatWidget() {
                 onKeyDown={handleKeyDown}
                 placeholder="Type your message..."
                 rows={1}
-                className="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
+                className="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
               <button
                 onClick={() => handleSendMessage(inputValue)}
                 disabled={!inputValue.trim() || isLoading}
-                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-teal-600 text-white transition-colors hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Send message"
               >
                 <Send size={18} />
