@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, CalendarClock, Loader2, ArrowRight, Timer } from "lucide-react";
+import { CheckCircle2, CalendarClock, Timer } from "lucide-react";
 
 interface BookingSummaryProps {
     treatment: { name: string; priceRange: string } | null;
@@ -74,8 +74,8 @@ export default function BookingSummary({
                 {holdExpiresAt && timeLeft !== null && (
                     <div
                         className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold ${timeLeft < 60
-                                ? "bg-red-50 text-red-600"
-                                : "bg-amber-50 text-amber-700"
+                            ? "bg-red-50 text-red-600"
+                            : "bg-amber-50 text-amber-700"
                             }`}
                     >
                         <Timer size={16} className="shrink-0" />
@@ -166,30 +166,10 @@ export default function BookingSummary({
                     </div>
                 </div>
 
-                {/* CTA */}
-                <button
-                    onClick={onConfirm}
-                    disabled={!canConfirm}
-                    className={`w-full py-4 rounded-2xl font-bold text-base transition-all duration-300 shadow-xl flex items-center justify-center gap-2 ${!canConfirm
-                            ? "bg-slate-100 text-slate-300 cursor-not-allowed shadow-none"
-                            : "bg-primary text-white hover:opacity-90 shadow-primary/20 active:scale-[0.98]"
-                        }`}
-                >
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 size={18} className="animate-spin" />
-                            Redirecting to Payment...
-                        </>
-                    ) : (
-                        <>
-                            Proceed to Payment
-                            <ArrowRight size={18} />
-                        </>
-                    )}
-                </button>
-
+                {/* Info note — Payment CTA is only on the Confirm step */}
                 <p className="text-center text-[10px] text-slate-700 font-medium leading-relaxed">
-                    By confirming, you agree to our{" "}
+                    Complete all steps to proceed to payment.
+                    You agree to our{" "}
                     <a href="#" className="underline">
                         Cancellation Policy
                     </a>{" "}

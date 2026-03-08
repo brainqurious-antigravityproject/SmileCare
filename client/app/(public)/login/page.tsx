@@ -6,10 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { LogIn, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
-import Image from "next/image";
 
 function LoginForm() {
-  const { login, getLoginCredentials, loginWithGoogle, loginWithApple } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const prefillEmail = searchParams.get("email") || "";
@@ -22,14 +21,20 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [noAccount, setNoAccount] = useState(false);
 
-  // Auto-fill credentials from registration
+  // Auto-fill credentials from registration (sessionStorage)
   useEffect(() => {
-    const credentials = getLoginCredentials();
-    if (credentials) {
-      setEmail(credentials.email);
-      setPassword(credentials.password);
+    try {
+      const stored = sessionStorage.getItem("smilecare_prefill");
+      if (stored) {
+        const credentials = JSON.parse(stored);
+        if (credentials.email) setEmail(credentials.email);
+        if (credentials.password) setPassword(credentials.password);
+        sessionStorage.removeItem("smilecare_prefill");
+      }
+    } catch {
+      // ignore parse errors
     }
-  }, [getLoginCredentials]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,8 +43,8 @@ function LoginForm() {
     setLoading(true);
     try {
       await login(email, password, redirectTo);
-    } catch (err: any) {
-      const msg: string = err.message || "";
+    } catch (err: unknown) {
+      const msg: string = (err instanceof Error ? err.message : "") || "";
       if (
         msg.toLowerCase().includes("not found") ||
         msg.toLowerCase().includes("no account") ||
@@ -57,10 +62,6 @@ function LoginForm() {
 
   const handleGoogleLogin = () => {
     loginWithGoogle();
-  };
-
-  const handleAppleLogin = () => {
-    loginWithApple();
   };
 
   return (
@@ -155,14 +156,13 @@ function LoginForm() {
           {noAccount && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <p className="text-sm text-yellow-800">
-                User not found. Please{" "}
+                Don&apos;t have an account?{" "}
                 <Link
-                  href="/signup"
+                  href="/register"
                   className="font-bold underline cursor-pointer animate-pulse hover:text-blue-600 transition-colors"
                 >
-                  create an account
-                </Link>{" "}
-                first.
+                  Create an account
+                </Link>
               </p>
             </div>
           )}
@@ -205,8 +205,8 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* OAuth Buttons */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Google OAuth Button */}
+          <div>
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -230,27 +230,16 @@ function LoginForm() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Google
-            </button>
-
-            <button
-              type="button"
-              onClick={handleAppleLogin}
-              className="w-full inline-flex justify-center items-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm bg-black text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-              </svg>
-              Apple
+              Continue with Google
             </button>
           </div>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
-              href="/signup"
+              href="/register"
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign up

@@ -567,11 +567,11 @@ export default function PaymentPage() {
 
                     {/* Actions */}
                     <div className="flex gap-3 mb-6">
-                        <Link href="/dashboard/bookings" className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:opacity-90 transition-all">
-                            View My Bookings
+                        <Link href="/dashboard" className="flex-1 bg-primary text-white text-center py-3 rounded-xl font-bold hover:opacity-90 transition-all">
+                            Go to Dashboard
                         </Link>
                         <Link href="/" className="flex-1 border-2 border-primary/20 text-primary text-center py-3 rounded-xl font-bold hover:bg-primary/5 transition-all">
-                            Go to Home
+                            Back to Home
                         </Link>
                     </div>
 

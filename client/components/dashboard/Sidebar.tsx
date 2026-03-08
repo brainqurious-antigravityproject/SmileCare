@@ -93,7 +93,7 @@ export default function Sidebar() {
             >
                 {/* Logo + Close */}
                 <div className="p-6 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <Link href="/" className="flex items-center gap-3 cursor-pointer">
                         <div className="size-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                             <span className="font-display font-bold text-lg">S</span>
                         </div>
@@ -101,7 +101,7 @@ export default function Sidebar() {
                             <h1 className="text-primary text-lg font-bold leading-none">SmileCare</h1>
                             <p className="text-primary/90 text-xs font-semibold uppercase tracking-wider">Clinical Luxury</p>
                         </div>
-                    </div>
+                    </Link>
                     <button
                         onClick={() => setOpen(false)}
                         className="lg:hidden text-primary/90 hover:text-primary"

@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -23,9 +24,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<User | null>;
   loginWithGoogle: () => Promise<void>;
-  loginWithApple: () => Promise<void>;
-  setLoginCredentials: (email: string, password: string) => void;
-  getLoginCredentials: () => { email: string; password: string } | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,9 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const { success, error: toastError } = useToast();
   const router = useRouter();
-  
-  // Store for pre-filled login credentials after registration
-  const [loginCredentials, setLoginCredentialsState] = useState<{ email: string; password: string } | null>(null);
 
   const refreshUser = useCallback(async (): Promise<User | null> => {
     try {
@@ -65,31 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
-  const setLoginCredentials = (email: string, password: string) => {
-    setLoginCredentialsState({ email, password });
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('pendingLoginCredentials', JSON.stringify({ email, password }));
-    }
-  };
-
-  const getLoginCredentials = () => {
-    if (loginCredentials) return loginCredentials;
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('pendingLoginCredentials');
-      if (stored) {
-        return JSON.parse(stored);
-      }
-    }
-    return null;
-  };
-
-  const clearLoginCredentials = () => {
-    setLoginCredentialsState(null);
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('pendingLoginCredentials');
-    }
-  };
-
   const login = async (email: string, password: string, redirectTo?: string) => {
     try {
       const res = await fetch(`${API}/api/auth/login`, {
@@ -103,14 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!res.ok) {
         const msg = data.message || data.error || "Login failed";
-        
+
         // Check if error is "User not found" - prompt to create account
         if (msg.toLowerCase().includes("user not found") || msg.toLowerCase().includes("no user") || msg.toLowerCase().includes("does not exist")) {
           toastError(
             <div>
               User not found. Please{" "}
-              <span 
-                onClick={() => router.push('/register')} 
+              <span
+                onClick={() => router.push('/register')}
                 className="underline cursor-pointer font-bold animate-pulse hover:text-blue-400"
               >
                 create an account
@@ -126,19 +96,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setUser(data.user);
       success("Login successful!");
-      clearLoginCredentials();
+
+      // Clear any pre-fill credentials
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('smilecare_prefill');
+      }
 
       // Handle redirect logic
-      if (redirectTo) {
-        if (redirectTo === '/appointment') {
-          router.push('/dashboard');
-        } else {
-          router.push(redirectTo);
-        }
+      if (redirectTo && redirectTo !== '/dashboard') {
+        router.push(redirectTo);
+      } else if (typeof window !== 'undefined') {
+        // Check if user came from homepage
+        try {
+          const ref = document.referrer;
+          if (ref) {
+            const refUrl = new URL(ref);
+            if (refUrl.origin === window.location.origin && refUrl.pathname === '/') {
+              router.push('/');
+              return;
+            }
+          }
+        } catch { /* ignore invalid referrer */ }
+        router.push(redirectTo || "/dashboard");
       } else {
         router.push("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
       // Error already shown in toast above
     }
@@ -162,17 +145,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       success("Registration successful! Redirecting to login...");
-      
-      // Store credentials for auto-fill on login page
-      setLoginCredentials(email, password);
-      
+
+      // Store credentials for auto-fill on login page via sessionStorage
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('smilecare_prefill', JSON.stringify({ email, password }));
+      }
+
       // Redirect to login page after a short delay
       setTimeout(() => {
         router.push('/login');
       }, 1500);
 
       return { success: true, email, password };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Registration error:", err);
       return { success: false };
     }
@@ -185,7 +170,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
       setUser(null);
-      clearLoginCredentials();
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('smilecare_prefill');
+      }
       success("Logged out successfully!");
       router.push("/");
     } catch (err) {
@@ -196,21 +183,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginWithGoogle = async () => {
     try {
-      // Redirect to backend Google OAuth endpoint
-      window.location.href = `${API}/api/auth/google`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        throw error;
+      }
     } catch (err) {
       console.error("Google login error:", err);
-      toastError("Google login failed");
-    }
-  };
-
-  const loginWithApple = async () => {
-    try {
-      // Redirect to backend Apple OAuth endpoint
-      window.location.href = `${API}/api/auth/apple`;
-    } catch (err) {
-      console.error("Apple login error:", err);
-      toastError("Apple login failed");
+      toastError("Google login failed. Please try again.");
     }
   };
 
@@ -225,9 +209,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshUser,
         loginWithGoogle,
-        loginWithApple,
-        setLoginCredentials,
-        getLoginCredentials,
       }}
     >
       {children}

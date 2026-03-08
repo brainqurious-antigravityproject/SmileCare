@@ -64,10 +64,13 @@ export default function ChatWidget() {
   // -- Auto-open greeting (only on homepage, not on booking/payment) --
   useEffect(() => {
     const pathname = window.location.pathname;
-    const isSensitivePage = pathname.includes("/book") || 
-                           pathname.includes("/appointment") || 
-                           pathname.includes("/payment");
-    
+    const isSensitivePage = pathname.includes("/book") ||
+      pathname.includes("/appointment") ||
+      pathname.includes("/payment") ||
+      pathname.includes("/login") ||
+      pathname.includes("/register") ||
+      pathname.includes("/signup");
+
     if (!hasAutoOpened && !isSensitivePage) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -216,9 +219,8 @@ export default function ChatWidget() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex gap-3 ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 {msg.role === "assistant" && (
                   <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-teal-100">
@@ -226,11 +228,10 @@ export default function ChatWidget() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 ${msg.role === "user"
                       ? "bg-teal-600 text-white"
                       : "bg-gray-100 text-gray-900"
-                  }`}
+                    }`}
                 >
                   {msg.isEmergency && (
                     <div className="mb-2 flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -238,30 +239,29 @@ export default function ChatWidget() {
                       <span className="font-semibold">Emergency Detected</span>
                     </div>
                   )}
-                  
-<div className="prose prose-sm max-w-none">
-  <ReactMarkdown
-    components={{
-      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-      a: ({ href, children }) => (
-        <a href={href} className="underline hover:no-underline" target="_blank" rel="noopener noreferrer">
-          {children}
-        </a>
-      ),
-    }}
-  >
-    {msg.content}
-  </ReactMarkdown>
-</div>
+
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        a: ({ href, children }) => (
+                          <a href={href} className="underline hover:no-underline" target="_blank" rel="noopener noreferrer">
+                            {children}
+                          </a>
+                        ),
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
 
                   {msg.cta && (
                     <button
                       onClick={() => handleCTAClick(msg.cta!.href)}
-                      className={`mt-3 flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                        msg.cta.variant === "primary"
+                      className={`mt-3 flex w-full items-center justify-between rounded-lg px-4 py-2 text-sm font-medium transition-colors ${msg.cta.variant === "primary"
                           ? "bg-teal-600 text-white hover:bg-teal-700"
                           : "border border-teal-600 text-teal-600 hover:bg-teal-50"
-                      }`}
+                        }`}
                     >
                       <span>{msg.cta.label}</span>
                       <ChevronRight size={16} />
