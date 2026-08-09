@@ -20,12 +20,14 @@ const TestimonialsSection = () => {
                                 {
                                     name: "Sarah Miller",
                                     role: "Cosmetic Patient",
+                                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200",
                                     text: "The technology here is incredible. I was nervous about my veneers but the digital planning made me feel so confident. The result is better than I ever imagined!",
                                     rating: 5
                                 },
                                 {
                                     name: "James Wilson",
                                     role: "Invisalign Patient",
+                                    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200",
                                     text: "Professional, friendly, and efficient. The clinic is beautiful and the team really cares about your comfort. Highly recommend for anyone looking for dental work.",
                                     rating: 5
                                 }
@@ -40,7 +42,7 @@ const TestimonialsSection = () => {
                                     <div className="flex items-center gap-4 mt-2">
                                         <div className="w-12 h-12 rounded-full bg-gray-300 overflow-hidden relative shrink-0">
                                             <Image
-                                                src={`https://i.pravatar.cc/150?u=${testimonial.name}`}
+                                                src={testimonial.avatar}
                                                 alt={testimonial.name}
                                                 fill
                                                 className="object-cover"

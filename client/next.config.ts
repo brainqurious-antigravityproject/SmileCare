@@ -11,8 +11,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.supabase.co",
       },
-      // NOTE: i.pravatar.cc removed — third-party random avatar service is an
-      // unnecessary attack surface. Replace with a controlled avatar solution.
+      {
+        protocol: "https",
+        hostname: "i.pravatar.cc",
+      },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
       {
         protocol: "https",
         hostname: "**.smilecare.com",
@@ -40,10 +46,10 @@ const nextConfig: NextConfig = {
               "font-src 'self' https://fonts.gstatic.com",
               // Allow scripts from self and Vercel analytics
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
-              // Allow connections to Supabase and backend API
-              "connect-src 'self' https://*.supabase.co https://*.onrender.com wss://*.supabase.co",
+              // Allow connections to local API, Supabase and backend API
+              "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.supabase.co https://*.onrender.com wss://*.supabase.co",
               // Images from whitelisted domains
-              "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://res.cloudinary.com https://*.smilecare.com",
+              "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://res.cloudinary.com https://*.smilecare.com https://i.pravatar.cc https://ui-avatars.com",
               // Media
               "media-src 'self'",
               // Frame protection
