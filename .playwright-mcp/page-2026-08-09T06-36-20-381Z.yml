@@ -1,0 +1,174 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - navigation [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - link "SmileCare." [ref=f1e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f1e8]:
+            - link "Home" [ref=f1e9] [cursor=pointer]:
+              - /url: /
+            - link "Treatments" [ref=f1e10] [cursor=pointer]:
+              - /url: /treatments
+            - link "Smile Gallery" [ref=f1e11] [cursor=pointer]:
+              - /url: /#gallery
+            - link "About" [ref=f1e12] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=f1e13] [cursor=pointer]:
+              - /url: /contact
+          - link "Book Appointment" [ref=f1e15] [cursor=pointer]:
+            - /url: /booking
+    - main [ref=f1e585]:
+      - generic [ref=f1e586]:
+        - generic [ref=f1e587]:
+          - navigation [ref=f1e588]:
+            - link "Home" [ref=f1e589] [cursor=pointer]:
+              - /url: /
+            - generic [ref=f1e592]: Book Appointment
+          - button "Onboarding Guide" [ref=f1e593]
+        - generic [ref=f1e598]:
+          - generic [ref=f1e599]:
+            - heading "Concierge Booking" [level=1] [ref=f1e600]
+            - paragraph [ref=f1e601]: Tailoring your premium dental experience step by step with our world-class specialists.
+          - generic [ref=f1e607]:
+            - generic [ref=f1e608]: Instant Slot Hold
+            - text: No waiting line guarantee
+        - generic [ref=f1e609]:
+          - generic [ref=f1e610]:
+            - generic [ref=f1e612]:
+              - generic [ref=f1e613]:
+                - button "Go to step Treatment" [ref=f1e614]
+                - generic [ref=f1e619]: Treatment
+              - generic [ref=f1e620]:
+                - button "Go to step Specialist" [disabled] [ref=f1e622]
+                - generic [ref=f1e626]: Specialist
+              - generic [ref=f1e627]:
+                - button "Go to step Schedule" [disabled] [ref=f1e629]
+                - generic [ref=f1e632]: Schedule
+              - generic [ref=f1e633]:
+                - button "Go to step Details" [disabled] [ref=f1e635]
+                - generic [ref=f1e639]: Details
+            - generic [ref=f1e643]:
+              - generic [ref=f1e644]: "Onboarding Step Guide:"
+              - text: Select your required dental service. Undecided? Pick Oral Health Check for a complete 3D assessment.
+            - generic [ref=f1e645]:
+              - generic [ref=f1e646]:
+                - generic [ref=f1e647]: "1"
+                - heading "Select Treatment" [level=3] [ref=f1e648]
+              - generic [ref=f1e649]:
+                - button "Laser Teeth Whitening Brighten your smile up to 8 shades in a single visit with gentle laser activation. Cosmetic" [ref=f1e650] [cursor=pointer]:
+                  - generic [ref=f1e657]:
+                    - heading "Laser Teeth Whitening" [level=4] [ref=f1e658]
+                    - paragraph [ref=f1e659]: Brighten your smile up to 8 shades in a single visit with gentle laser activation.
+                  - generic [ref=f1e660]: Cosmetic
+                - button "Porcelain Veneers Flawless, ultra-thin ceramic restorations tailored by top Swiss dental technicians. Cosmetic" [ref=f1e661] [cursor=pointer]:
+                  - generic [ref=f1e668]:
+                    - heading "Porcelain Veneers" [level=4] [ref=f1e669]
+                    - paragraph [ref=f1e670]: Flawless, ultra-thin ceramic restorations tailored by top Swiss dental technicians.
+                  - generic [ref=f1e671]: Cosmetic
+                - button "Invisalign Clear Aligners Straighten teeth discreetly with custom 3D SmartTrack clear aligners. Orthodontics" [ref=f1e672] [cursor=pointer]:
+                  - generic [ref=f1e679]:
+                    - heading "Invisalign Clear Aligners" [level=4] [ref=f1e680]
+                    - paragraph [ref=f1e681]: Straighten teeth discreetly with custom 3D SmartTrack clear aligners.
+                  - generic [ref=f1e682]: Orthodontics
+                - button "Permanent Dental Implants Swiss titanium root replacement for natural aesthetics & lifelong function. Restorative" [ref=f1e683] [cursor=pointer]:
+                  - generic [ref=f1e690]:
+                    - heading "Permanent Dental Implants" [level=4] [ref=f1e691]
+                    - paragraph [ref=f1e692]: Swiss titanium root replacement for natural aesthetics & lifelong function.
+                  - generic [ref=f1e693]: Restorative
+                - button "Complete Oral Health Check Comprehensive 3D low-radiation diagnostic scan and specialist assessment. Preventative" [ref=f1e694] [cursor=pointer]:
+                  - generic [ref=f1e701]:
+                    - heading "Complete Oral Health Check" [level=4] [ref=f1e702]
+                    - paragraph [ref=f1e703]: Comprehensive 3D low-radiation diagnostic scan and specialist assessment.
+                  - generic [ref=f1e704]: Preventative
+                - button "Zirconia Crowns & Bridges CAD/CAM milled biocompatible crowns restoring 100% natural chewing strength. Restorative" [ref=f1e705] [cursor=pointer]:
+                  - generic [ref=f1e712]:
+                    - heading "Zirconia Crowns & Bridges" [level=4] [ref=f1e713]
+                    - paragraph [ref=f1e714]: CAD/CAM milled biocompatible crowns restoring 100% natural chewing strength.
+                  - generic [ref=f1e715]: Restorative
+          - generic [ref=f1e717]:
+            - heading "Booking Summary" [level=3] [ref=f1e718]
+            - generic [ref=f1e719]:
+              - generic [ref=f1e720]:
+                - generic [ref=f1e721]: Service
+                - generic [ref=f1e722]: Not selected
+              - generic [ref=f1e724]:
+                - generic [ref=f1e725]: Provider
+                - generic [ref=f1e726]: Not selected
+              - generic [ref=f1e728]:
+                - generic [ref=f1e729]: Date & Time
+                - generic [ref=f1e730]: Not selected
+            - generic [ref=f1e732]:
+              - text: Complete all steps to confirm your booking. You agree to our
+              - link "Cancellation Policy" [ref=f1e733] [cursor=pointer]:
+                - /url: "#"
+              - text: and elite clinical standards.
+    - contentinfo [ref=f1e120]:
+      - generic [ref=f1e121]:
+        - generic [ref=f1e122]:
+          - generic [ref=f1e123]:
+            - link "SmileCare." [ref=f1e124] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f1e125]: Providing world-class dental care with the latest technology and a gentle touch. Your smile is our priority.
+            - generic [ref=f1e126]:
+              - generic [ref=f1e127] [cursor=pointer]
+              - generic [ref=f1e129] [cursor=pointer]
+              - generic [ref=f1e131] [cursor=pointer]
+              - generic [ref=f1e133] [cursor=pointer]
+          - generic [ref=f1e135]:
+            - heading "Quick Links" [level=4] [ref=f1e136]
+            - list [ref=f1e137]:
+              - listitem [ref=f1e138]:
+                - link "Home" [ref=f1e139] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f1e140]:
+                - link "Treatments" [ref=f1e141] [cursor=pointer]:
+                  - /url: /treatments
+              - listitem [ref=f1e142]:
+                - link "About Us" [ref=f1e143] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=f1e144]:
+                - link "Blog" [ref=f1e145] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=f1e146]:
+                - link "Contact" [ref=f1e147] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=f1e148]:
+            - heading "Treatments" [level=4] [ref=f1e149]
+            - list [ref=f1e150]:
+              - listitem [ref=f1e151]:
+                - link "Invisalign" [ref=f1e152] [cursor=pointer]:
+                  - /url: /treatments#invisalign
+              - listitem [ref=f1e153]:
+                - link "Dental Implants" [ref=f1e154] [cursor=pointer]:
+                  - /url: /treatments#implants
+              - listitem [ref=f1e155]:
+                - link "Teeth Whitening" [ref=f1e156] [cursor=pointer]:
+                  - /url: /treatments#whitening
+              - listitem [ref=f1e157]:
+                - link "Root Canal" [ref=f1e158] [cursor=pointer]:
+                  - /url: /treatments#root-canal
+              - listitem [ref=f1e159]:
+                - link "Cosmetic Dentistry" [ref=f1e160] [cursor=pointer]:
+                  - /url: /treatments#cosmetic
+          - generic [ref=f1e161]:
+            - heading "Contact Us" [level=4] [ref=f1e162]
+            - list [ref=f1e163]:
+              - listitem [ref=f1e164]:
+                - generic [ref=f1e165]: 📍
+                - text: 123 Dental Plaza, Healthcare City, NY 10001
+              - listitem [ref=f1e166]:
+                - generic [ref=f1e167]: 📞
+                - text: (123) 456-7890
+              - listitem [ref=f1e168]:
+                - generic [ref=f1e169]: ✉️
+                - text: contact@smilecare.com
+        - generic [ref=f1e170]:
+          - paragraph [ref=f1e171]: © 2026 SmileCare Dental Clinic. All rights reserved.
+          - generic [ref=f1e172]:
+            - link "Privacy Policy" [ref=f1e173] [cursor=pointer]:
+              - /url: /privacy
+            - link "Terms of Service" [ref=f1e174] [cursor=pointer]:
+              - /url: /terms
+  - button "Open Next.js Dev Tools" [ref=f1e294] [cursor=pointer]
+  - alert [ref=f1e298]

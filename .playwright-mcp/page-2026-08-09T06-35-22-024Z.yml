@@ -1,0 +1,202 @@
+- generic [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - navigation [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - link "SmileCare." [ref=f1e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f1e8]:
+            - link "Home" [ref=f1e9] [cursor=pointer]:
+              - /url: /
+            - link "Treatments" [ref=f1e10] [cursor=pointer]:
+              - /url: /treatments
+            - link "Smile Gallery" [ref=f1e11] [cursor=pointer]:
+              - /url: /#gallery
+            - link "About" [ref=f1e12] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=f1e13] [cursor=pointer]:
+              - /url: /contact
+          - link "Book Appointment" [ref=f1e15] [cursor=pointer]:
+            - /url: /booking
+    - main [ref=f1e17]:
+      - generic [ref=f1e18]:
+        - generic [ref=f1e19]:
+          - navigation [ref=f1e20]:
+            - link "Home" [ref=f1e21] [cursor=pointer]:
+              - /url: /
+            - generic [ref=f1e24]: Book Appointment
+          - button "Onboarding Guide" [ref=f1e25]
+        - generic [ref=f1e30]:
+          - generic [ref=f1e31]:
+            - heading "Concierge Booking" [level=1] [ref=f1e32]
+            - paragraph [ref=f1e33]: Tailoring your premium dental experience step by step with our world-class specialists.
+          - generic [ref=f1e39]:
+            - generic [ref=f1e40]: Instant Slot Hold
+            - text: No waiting line guarantee
+        - generic [ref=f1e41]:
+          - generic [ref=f1e42]:
+            - generic [ref=f1e44]:
+              - generic [ref=f1e45]:
+                - button "Go to step Treatment" [ref=f1e46] [cursor=pointer]
+                - generic [ref=f1e51]: Treatment
+              - generic [ref=f1e52]:
+                - button "Go to step Specialist" [ref=f1e54] [cursor=pointer]
+                - generic [ref=f1e58]: Specialist
+              - generic [ref=f1e59]:
+                - button "Go to step Schedule" [ref=f1e61]
+                - generic [ref=f1e64]: Schedule
+              - generic [ref=f1e65]:
+                - button "Go to step Details" [ref=f1e67] [cursor=pointer]
+                - generic [ref=f1e71]: Details
+            - generic [ref=f1e75]:
+              - generic [ref=f1e76]: "Onboarding Step Guide:"
+              - text: Select your date & time slot. Chosen slots are locked for 5 minutes while you confirm.
+            - generic [ref=f1e374]:
+              - generic [ref=f1e375]:
+                - generic [ref=f1e376]: "3"
+                - heading "Preferred Schedule" [level=3] [ref=f1e377]
+              - generic [ref=f1e378]:
+                - generic [ref=f1e379]:
+                  - generic [ref=f1e380]:
+                    - heading "August 2026" [level=4] [ref=f1e381]
+                    - generic [ref=f1e382]:
+                      - button "Previous month" [disabled] [ref=f1e383]
+                      - button "Next month" [ref=f1e386]
+                  - generic [ref=f1e389]:
+                    - generic [ref=f1e390]: M
+                    - generic [ref=f1e391]: T
+                    - generic [ref=f1e392]: W
+                    - generic [ref=f1e393]: T
+                    - generic [ref=f1e394]: F
+                    - generic [ref=f1e395]: S
+                    - generic [ref=f1e396]: S
+                  - generic [ref=f1e397]:
+                    - button "1" [disabled] [ref=f1e403]
+                    - button "2" [disabled] [ref=f1e404]
+                    - button "3" [disabled] [ref=f1e405]
+                    - button "4" [disabled] [ref=f1e406]
+                    - button "5" [disabled] [ref=f1e407]
+                    - button "6" [disabled] [ref=f1e408]
+                    - button "7" [disabled] [ref=f1e409]
+                    - button "8" [disabled] [ref=f1e410]
+                    - button "9" [disabled] [ref=f1e411]
+                    - button "10" [ref=f1e412]
+                    - button "11" [ref=f1e414]
+                    - button "12" [ref=f1e416]
+                    - button "13" [ref=f1e418]
+                    - button "14" [ref=f1e420]
+                    - button "15" [ref=f1e422]
+                    - button "16" [ref=f1e424]
+                    - button "17" [ref=f1e426]
+                    - button "18" [ref=f1e428]
+                    - button "19" [ref=f1e430]
+                    - button "20" [ref=f1e432]
+                    - button "21" [ref=f1e434]
+                    - button "22" [ref=f1e436]
+                    - button "23" [ref=f1e438]
+                    - button "24" [ref=f1e440]
+                    - button "25" [ref=f1e442]
+                    - button "26" [ref=f1e444]
+                    - button "27" [ref=f1e446]
+                    - button "28" [ref=f1e448]
+                    - button "29" [ref=f1e450]
+                    - button "30" [disabled] [ref=f1e452]
+                    - button "31" [disabled] [ref=f1e453]
+                - generic [ref=f1e454]:
+                  - heading "Available Slots" [level=4] [ref=f1e455]
+                  - generic [ref=f1e465]:
+                    - button "09:00 AM" [active] [ref=f1e466]
+                    - button "10:30 AM" [ref=f1e467]
+                    - button "12:00 PM" [ref=f1e468]
+                    - button "02:30 PM" [ref=f1e469]
+                    - button "04:00 PM" [ref=f1e470]
+                    - button "05:30 PM" [ref=f1e471]
+                  - generic [ref=f1e472]:
+                    - paragraph [ref=f1e473]: "Expected duration: 60 minutes"
+                    - button "Proceed to Details" [ref=f1e474]
+          - generic [ref=f1e103]:
+            - heading "Booking Summary" [level=3] [ref=f1e104]
+            - generic [ref=f1e105]:
+              - generic [ref=f1e106]:
+                - generic [ref=f1e107]: Service
+                - generic [ref=f1e108]: Laser Teeth Whitening
+              - generic [ref=f1e110]:
+                - generic [ref=f1e111]: Provider
+                - generic [ref=f1e112]: Dr. Sarah Jenkins
+              - generic [ref=f1e114]:
+                - generic [ref=f1e115]: Date & Time
+                - generic [ref=f1e116]: 10 Aug 2026 • 09:00 AM
+            - generic [ref=f1e118]:
+              - text: Complete all steps to confirm your booking. You agree to our
+              - link "Cancellation Policy" [ref=f1e119] [cursor=pointer]:
+                - /url: "#"
+              - text: and elite clinical standards.
+    - contentinfo [ref=f1e120]:
+      - generic [ref=f1e121]:
+        - generic [ref=f1e122]:
+          - generic [ref=f1e123]:
+            - link "SmileCare." [ref=f1e124] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f1e125]: Providing world-class dental care with the latest technology and a gentle touch. Your smile is our priority.
+            - generic [ref=f1e126]:
+              - generic [ref=f1e127] [cursor=pointer]
+              - generic [ref=f1e129] [cursor=pointer]
+              - generic [ref=f1e131] [cursor=pointer]
+              - generic [ref=f1e133] [cursor=pointer]
+          - generic [ref=f1e135]:
+            - heading "Quick Links" [level=4] [ref=f1e136]
+            - list [ref=f1e137]:
+              - listitem [ref=f1e138]:
+                - link "Home" [ref=f1e139] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f1e140]:
+                - link "Treatments" [ref=f1e141] [cursor=pointer]:
+                  - /url: /treatments
+              - listitem [ref=f1e142]:
+                - link "About Us" [ref=f1e143] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=f1e144]:
+                - link "Blog" [ref=f1e145] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=f1e146]:
+                - link "Contact" [ref=f1e147] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=f1e148]:
+            - heading "Treatments" [level=4] [ref=f1e149]
+            - list [ref=f1e150]:
+              - listitem [ref=f1e151]:
+                - link "Invisalign" [ref=f1e152] [cursor=pointer]:
+                  - /url: /treatments#invisalign
+              - listitem [ref=f1e153]:
+                - link "Dental Implants" [ref=f1e154] [cursor=pointer]:
+                  - /url: /treatments#implants
+              - listitem [ref=f1e155]:
+                - link "Teeth Whitening" [ref=f1e156] [cursor=pointer]:
+                  - /url: /treatments#whitening
+              - listitem [ref=f1e157]:
+                - link "Root Canal" [ref=f1e158] [cursor=pointer]:
+                  - /url: /treatments#root-canal
+              - listitem [ref=f1e159]:
+                - link "Cosmetic Dentistry" [ref=f1e160] [cursor=pointer]:
+                  - /url: /treatments#cosmetic
+          - generic [ref=f1e161]:
+            - heading "Contact Us" [level=4] [ref=f1e162]
+            - list [ref=f1e163]:
+              - listitem [ref=f1e164]:
+                - generic [ref=f1e165]: 📍
+                - text: 123 Dental Plaza, Healthcare City, NY 10001
+              - listitem [ref=f1e166]:
+                - generic [ref=f1e167]: 📞
+                - text: (123) 456-7890
+              - listitem [ref=f1e168]:
+                - generic [ref=f1e169]: ✉️
+                - text: contact@smilecare.com
+        - generic [ref=f1e170]:
+          - paragraph [ref=f1e171]: © 2026 SmileCare Dental Clinic. All rights reserved.
+          - generic [ref=f1e172]:
+            - link "Privacy Policy" [ref=f1e173] [cursor=pointer]:
+              - /url: /privacy
+            - link "Terms of Service" [ref=f1e174] [cursor=pointer]:
+              - /url: /terms
+  - button "Open Next.js Dev Tools" [ref=f1e294] [cursor=pointer]
+  - alert [ref=f1e298]

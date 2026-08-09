@@ -1,0 +1,136 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "SmileCare." [ref=e7] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e8]:
+          - link "Home" [ref=e9] [cursor=pointer]:
+            - /url: /
+          - link "Treatments" [ref=e10] [cursor=pointer]:
+            - /url: /treatments
+          - link "Smile Gallery" [ref=e11] [cursor=pointer]:
+            - /url: /#gallery
+          - link "About" [ref=e12] [cursor=pointer]:
+            - /url: /about
+          - link "Contact" [ref=e13] [cursor=pointer]:
+            - /url: /contact
+        - link "Book Appointment" [ref=e15] [cursor=pointer]:
+          - /url: /booking
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - navigation [ref=e20]:
+          - link "Home" [ref=e21] [cursor=pointer]:
+            - /url: /
+          - generic [ref=e24]: Book Appointment
+        - button "Onboarding Guide" [ref=e25]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "Concierge Booking" [level=1] [ref=e32]
+          - paragraph [ref=e33]: Tailoring your premium dental experience step by step with our world-class specialists.
+        - generic [ref=e39]:
+          - generic [ref=e40]: Instant Slot Hold
+          - text: No waiting line guarantee
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e44]:
+            - generic [ref=e45]:
+              - button "Go to step Treatment" [ref=e46]
+              - generic [ref=e51]: Treatment
+            - generic [ref=e52]:
+              - button "Go to step Specialist" [disabled] [ref=e54]
+              - generic [ref=e58]: Specialist
+            - generic [ref=e59]:
+              - button "Go to step Schedule" [disabled] [ref=e61]
+              - generic [ref=e64]: Schedule
+            - generic [ref=e65]:
+              - button "Go to step Details" [disabled] [ref=e67]
+              - generic [ref=e71]: Details
+          - generic [ref=e75]:
+            - generic [ref=e76]: "Onboarding Step Guide:"
+            - text: Select your required dental service. Undecided? Pick Oral Health Check for a complete 3D assessment.
+        - generic [ref=e103]:
+          - heading "Booking Summary" [level=3] [ref=e104]
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - generic [ref=e107]: Service
+              - generic [ref=e108]: Not selected
+            - generic [ref=e110]:
+              - generic [ref=e111]: Provider
+              - generic [ref=e112]: Not selected
+            - generic [ref=e114]:
+              - generic [ref=e115]: Date & Time
+              - generic [ref=e116]: Not selected
+          - generic [ref=e118]:
+            - text: Complete all steps to confirm your booking. You agree to our
+            - link "Cancellation Policy" [ref=e119] [cursor=pointer]:
+              - /url: "#"
+            - text: and elite clinical standards.
+  - contentinfo [ref=e120]:
+    - generic [ref=e121]:
+      - generic [ref=e122]:
+        - generic [ref=e123]:
+          - link "SmileCare." [ref=e124] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=e125]: Providing world-class dental care with the latest technology and a gentle touch. Your smile is our priority.
+          - generic [ref=e126]:
+            - generic [ref=e127] [cursor=pointer]
+            - generic [ref=e129] [cursor=pointer]
+            - generic [ref=e131] [cursor=pointer]
+            - generic [ref=e133] [cursor=pointer]
+        - generic [ref=e135]:
+          - heading "Quick Links" [level=4] [ref=e136]
+          - list [ref=e137]:
+            - listitem [ref=e138]:
+              - link "Home" [ref=e139] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e140]:
+              - link "Treatments" [ref=e141] [cursor=pointer]:
+                - /url: /treatments
+            - listitem [ref=e142]:
+              - link "About Us" [ref=e143] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e144]:
+              - link "Blog" [ref=e145] [cursor=pointer]:
+                - /url: /blog
+            - listitem [ref=e146]:
+              - link "Contact" [ref=e147] [cursor=pointer]:
+                - /url: /contact
+        - generic [ref=e148]:
+          - heading "Treatments" [level=4] [ref=e149]
+          - list [ref=e150]:
+            - listitem [ref=e151]:
+              - link "Invisalign" [ref=e152] [cursor=pointer]:
+                - /url: /treatments#invisalign
+            - listitem [ref=e153]:
+              - link "Dental Implants" [ref=e154] [cursor=pointer]:
+                - /url: /treatments#implants
+            - listitem [ref=e155]:
+              - link "Teeth Whitening" [ref=e156] [cursor=pointer]:
+                - /url: /treatments#whitening
+            - listitem [ref=e157]:
+              - link "Root Canal" [ref=e158] [cursor=pointer]:
+                - /url: /treatments#root-canal
+            - listitem [ref=e159]:
+              - link "Cosmetic Dentistry" [ref=e160] [cursor=pointer]:
+                - /url: /treatments#cosmetic
+        - generic [ref=e161]:
+          - heading "Contact Us" [level=4] [ref=e162]
+          - list [ref=e163]:
+            - listitem [ref=e164]:
+              - generic [ref=e165]: 📍
+              - text: 123 Dental Plaza, Healthcare City, NY 10001
+            - listitem [ref=e166]:
+              - generic [ref=e167]: 📞
+              - text: (123) 456-7890
+            - listitem [ref=e168]:
+              - generic [ref=e169]: ✉️
+              - text: contact@smilecare.com
+      - generic [ref=e170]:
+        - paragraph [ref=e171]: © 2026 SmileCare Dental Clinic. All rights reserved.
+        - generic [ref=e172]:
+          - link "Privacy Policy" [ref=e173] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e174] [cursor=pointer]:
+            - /url: /terms

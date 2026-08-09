@@ -1,0 +1,123 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - banner [ref=f1e3]:
+      - navigation [ref=f1e4]:
+        - generic [ref=f1e5]:
+          - link "SmileCare." [ref=f1e7] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f1e8]:
+            - link "Home" [ref=f1e9] [cursor=pointer]:
+              - /url: /
+            - link "Treatments" [ref=f1e10] [cursor=pointer]:
+              - /url: /treatments
+            - link "Smile Gallery" [ref=f1e11] [cursor=pointer]:
+              - /url: /#gallery
+            - link "About" [ref=f1e12] [cursor=pointer]:
+              - /url: /about
+            - link "Contact" [ref=f1e13] [cursor=pointer]:
+              - /url: /contact
+          - link "Book Appointment" [ref=f1e15] [cursor=pointer]:
+            - /url: /booking
+    - main [ref=f1e535]:
+      - generic [ref=f1e536]:
+        - heading "Booking Confirmed!" [level=1] [ref=f1e544]
+        - paragraph [ref=f1e545]: Your appointment has been successfully booked.
+        - generic [ref=f1e546]:
+          - generic [ref=f1e547]:
+            - generic [ref=f1e548]: Booking ID
+            - generic [ref=f1e549]: SMC-1275
+          - generic [ref=f1e550]:
+            - generic [ref=f1e551]: Treatment
+            - generic [ref=f1e552]: Laser Teeth Whitening
+          - generic [ref=f1e553]:
+            - generic [ref=f1e554]: Specialist
+            - generic [ref=f1e555]: Dr. Sarah Jenkins
+          - generic [ref=f1e556]:
+            - generic [ref=f1e557]: Date
+            - generic [ref=f1e558]: Monday, 10 August 2026
+          - generic [ref=f1e562]:
+            - generic [ref=f1e563]: Time
+            - generic [ref=f1e564]: 09:00 AM – 10:00 AM
+          - separator [ref=f1e565]
+          - generic [ref=f1e566]:
+            - generic [ref=f1e567]: Patient Name
+            - generic [ref=f1e568]: Jane Doe
+        - paragraph [ref=f1e573]: A confirmation email has been sent to janedoe@example.com
+        - button "Book Another Appointment" [ref=f1e574]
+    - contentinfo [ref=f1e120]:
+      - generic [ref=f1e121]:
+        - generic [ref=f1e122]:
+          - generic [ref=f1e123]:
+            - link "SmileCare." [ref=f1e124] [cursor=pointer]:
+              - /url: /
+            - paragraph [ref=f1e125]: Providing world-class dental care with the latest technology and a gentle touch. Your smile is our priority.
+            - generic [ref=f1e126]:
+              - generic [ref=f1e127] [cursor=pointer]
+              - generic [ref=f1e129] [cursor=pointer]
+              - generic [ref=f1e131] [cursor=pointer]
+              - generic [ref=f1e133] [cursor=pointer]
+          - generic [ref=f1e135]:
+            - heading "Quick Links" [level=4] [ref=f1e136]
+            - list [ref=f1e137]:
+              - listitem [ref=f1e138]:
+                - link "Home" [ref=f1e139] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=f1e140]:
+                - link "Treatments" [ref=f1e141] [cursor=pointer]:
+                  - /url: /treatments
+              - listitem [ref=f1e142]:
+                - link "About Us" [ref=f1e143] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=f1e144]:
+                - link "Blog" [ref=f1e145] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=f1e146]:
+                - link "Contact" [ref=f1e147] [cursor=pointer]:
+                  - /url: /contact
+          - generic [ref=f1e148]:
+            - heading "Treatments" [level=4] [ref=f1e149]
+            - list [ref=f1e150]:
+              - listitem [ref=f1e151]:
+                - link "Invisalign" [ref=f1e152] [cursor=pointer]:
+                  - /url: /treatments#invisalign
+              - listitem [ref=f1e153]:
+                - link "Dental Implants" [ref=f1e154] [cursor=pointer]:
+                  - /url: /treatments#implants
+              - listitem [ref=f1e155]:
+                - link "Teeth Whitening" [ref=f1e156] [cursor=pointer]:
+                  - /url: /treatments#whitening
+              - listitem [ref=f1e157]:
+                - link "Root Canal" [ref=f1e158] [cursor=pointer]:
+                  - /url: /treatments#root-canal
+              - listitem [ref=f1e159]:
+                - link "Cosmetic Dentistry" [ref=f1e160] [cursor=pointer]:
+                  - /url: /treatments#cosmetic
+          - generic [ref=f1e161]:
+            - heading "Contact Us" [level=4] [ref=f1e162]
+            - list [ref=f1e163]:
+              - listitem [ref=f1e164]:
+                - generic [ref=f1e165]: 📍
+                - text: 123 Dental Plaza, Healthcare City, NY 10001
+              - listitem [ref=f1e166]:
+                - generic [ref=f1e167]: 📞
+                - text: (123) 456-7890
+              - listitem [ref=f1e168]:
+                - generic [ref=f1e169]: ✉️
+                - text: contact@smilecare.com
+        - generic [ref=f1e170]:
+          - paragraph [ref=f1e171]: © 2026 SmileCare Dental Clinic. All rights reserved.
+          - generic [ref=f1e172]:
+            - link "Privacy Policy" [ref=f1e173] [cursor=pointer]:
+              - /url: /privacy
+            - link "Terms of Service" [ref=f1e174] [cursor=pointer]:
+              - /url: /terms
+  - button "Open Next.js Dev Tools" [ref=f1e294] [cursor=pointer]
+  - alert [ref=f1e298]
+  - generic "Notifications":
+    - alert [ref=f1e578]:
+      - generic [ref=f1e579]: check_circle
+      - generic [ref=f1e580]:
+        - generic [ref=f1e581]: Booking Confirmed!
+        - generic [ref=f1e582]: Your appointment has been confirmed. A confirmation voucher has been generated.
+      - button "Dismiss notification" [ref=f1e583]:
+        - generic [ref=f1e584]: close
